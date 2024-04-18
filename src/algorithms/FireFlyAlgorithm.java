@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Random;
 
 public class FireFlyAlgorithm implements Algorithm {
-    private int fireflyCount;
+    private int populationSize;
     private double attractivenessBase;
     private double alpha;
     private double beta;
@@ -22,7 +22,7 @@ public class FireFlyAlgorithm implements Algorithm {
 
     public FireFlyAlgorithm() {
         // Initializing custom parameters
-        this.fireflyCount = 100;
+        this.populationSize = 100;
         this.attractivenessBase = 0.1;
         this.alpha = 0.5;
         this.beta = 1.0;
@@ -34,42 +34,41 @@ public class FireFlyAlgorithm implements Algorithm {
         Solution solution = new Solution(problem);
         this.binCapacity = problem.getCapacity();
         
-        while (solution.getCurrentRuntime() < timeLimit * 1000L){
-            HashMap<Integer, Integer> problemItems = problem.items.getItems();
-            for (int weight : problemItems.keySet()) { // convert hashmap into array of integers
-            	for(int i = 0; i < problemItems.get(weight);i++) {
-            		items.add(weight);
-            	}
-            }
-            
-            int chromosomeLength = items.size();
-            List<Firefly> population = new ArrayList<>();
-            
-            for (int i = 0; i < fireflyCount; i++) {
-                population.add(new Firefly(createFireFlies(items, chromosomeLength),binCapacity));}
-
-            for (int iteration = 0; iteration < 100; iteration++) {
-                Collections.sort(population, Comparator.comparing(Firefly::getFitness));
-                moveFireflies(population);
-            }
-
-            // Convert Solution to list of bins
-            Firefly bestFirefly = Collections.min(population, Comparator.comparing(Firefly::getFitness));
-            ItemFactory binItems = new ItemFactory();
-            int currentBinCapacity = 0;
-            for (int firefly : bestFirefly.getPosition()) {
-                if (currentBinCapacity + firefly > binCapacity) {
-                    solution.bins.createBin(binItems);
-                    binItems = new ItemFactory();
-                    currentBinCapacity = 0;
-                }
-                binItems.addItem(firefly, 1);
-                currentBinCapacity += firefly;
-            }
-            solution.bins.createBin(binItems);
-
-            break; // Only running one iteration for demonstration, you can remove this break to run for full timeLimit
+        HashMap<Integer, Integer> problemItems = problem.items.getItems();
+        for (int weight : problemItems.keySet()) { // convert hashmap into array of integers
+        	for(int i = 0; i < problemItems.get(weight);i++) {
+        		items.add(weight);
+        	}
         }
+        
+        int Firefly_Position = items.size();
+        List<Firefly> population = new ArrayList<>();
+        for (int i = 0; i<populationSize; i++) {
+        	population.add(new Firefly(createFireFlies(items, Firefly_Position),binCapacity));
+        }
+        
+        int iteration=0;
+        while (solution.getCurrentRuntime() < timeLimit * 1000L) {
+        	Collections.sort(population, (c1, c2) -> Integer.compare(c1.getFitness(), c2.getFitness()));
+        	population = moveFireflies(population);
+        	iteration++;
+        }
+        
+        System.out.println("Iteration : " + iteration);
+ 
+        Firefly fittestFirefly = Collections.min(population, Comparator.comparing(Firefly::getFitness));
+        int currentBinCapacity = 0;
+        ItemFactory items = new ItemFactory();
+        for (int firefly : fittestFirefly.getPosition()) {
+        	if (currentBinCapacity + firefly > binCapacity) {// bin full
+        		solution.bins.createBin(items); //add to list of bins
+        		items = new ItemFactory(); //create new bin
+        		currentBinCapacity = 0;
+        	}
+        	items.addItem(firefly, 1); //add item to bin
+        	currentBinCapacity += firefly;
+        }
+            
 
         return solution.finalizeResult();
     }
@@ -79,34 +78,39 @@ public class FireFlyAlgorithm implements Algorithm {
         Collections.shuffle(individual);
         return individual;
     }
-
-    private void moveFireflies(List<Firefly> fireflies) {
-        Random random = new Random();
-        for (Firefly current : fireflies) {
-            for (Firefly other : fireflies) {
-                if (current.getFitness() < other.getFitness()) {
-                    double distance = calculateEuclideanDistance(current.getPosition(), other.getPosition());
-                    double betaAttractiveness = beta * Math.exp(-gamma * Math.pow(distance, 2));
-                    double moveProb = alpha * (random.nextDouble() - 0.5);
-
-                    for (int i = 0; i < current.getPosition().size(); i++) {
-                        if (random.nextDouble() < betaAttractiveness) {
-                            int newPosition = current.getPosition().get(i) + (int) moveProb;
-                            current.getPosition().set(i, newPosition);
-                        }
-                    }
-                    current.calculateFitness(binCapacity);
-                }
-            }
-        }
-    }
-
+    
     private double calculateEuclideanDistance(List<Integer> position1, List<Integer> position2) {
         double distance = 0;
         for (int i = 0; i < position1.size(); i++) {
             distance += Math.pow(position1.get(i) - position2.get(i), 2);
         }
         return Math.sqrt(distance);
+    }
+
+    private List<Firefly> moveFireflies(List<Firefly> fireflies) {
+    	Random random = new Random();
+    	List<Firefly> nextPosition = new ArrayList<>();
+    	
+    	for (Firefly current: fireflies) {
+    		for (Firefly other: fireflies) {
+    			if(current.getFitness() < other.getFitness()) {
+    				double distance = calculateEuclideanDistance(current.getPosition(), other.getPosition());
+    				double betaAttractiveness = beta * Math.exp(-gamma * Math.pow(distance, 2));
+    				double moveProb = alpha * (random.nextDouble()-0.5);
+    				
+                    for (int i = 0; i < current.getPosition().size(); i++) {
+                        if (random.nextDouble() < betaAttractiveness) {
+                            int newPosition = current.getPosition().get(i) + (int) moveProb;
+                            current.getPosition().set(i, newPosition);
+                        }
+                    }
+                    
+                    current.calculateFitness(binCapacity);
+    				
+    			}
+    		}
+    	}
+    	return fireflies;
     }
 }
 

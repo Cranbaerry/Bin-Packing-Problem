@@ -21,6 +21,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import algorithms.Algorithm;
 import algorithms.GeneticAlgorithm;
 import algorithms.ParticleSwarmOptimization;
+import algorithms.FireFlyAlgorithm;
 import factories.ItemFactory;
 import objects.Problem;
 import objects.Solution;
@@ -65,9 +66,9 @@ public class Main {
             saveFrameAsImage(frame, filePath);
             System.out.println("Image saved to: " + filePath);      
             
-            Algorithm particleSwarmOptimization = new ParticleSwarmOptimization();
-            Solution solution2 = particleSwarmOptimization.solve(problem, 3); // 5 seconds timeout
-            System.out.println("Particle Swarm Optimization Solution:");
+            Algorithm Fire = new FireFlyAlgorithm();
+            Solution solution2 = Fire.solve(problem, 3); // 5 seconds timeout
+            System.out.println("Firefly Algorithm Solution:");
             System.out.println("Runtime: " + solution2.getTotalRuntime() + " ms");
             System.out.println("Total bins used: " + solution2.bins.getNumberOfBins());
             System.out.println("Bins:");
