@@ -1,7 +1,6 @@
 package objects;
 
 import factories.BinFactory;
-import factories.ItemFactory;
 
 public class Solution {
     public BinFactory bins;
@@ -34,6 +33,7 @@ public class Solution {
     public long getCurrentRuntime() {
         return System.currentTimeMillis() - this.startTime;
     }
+
     public long getTotalRuntime() {
         return endTime;
     }

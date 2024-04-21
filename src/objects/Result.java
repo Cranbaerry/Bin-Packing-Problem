@@ -1,11 +1,6 @@
 package objects;
 
 import factories.ItemFactory;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-
-import javax.imageio.ImageIO;
-import javax.swing.*;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -14,7 +9,10 @@ import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.renderer.category.StackedBarRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
 
-
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,9 +24,7 @@ public class Result {
     private String algorithmName, problemName;
     private int numberOfBins;
     private long runtime;
-
     private double binFullness;
-
     private double fairnessOfPacking;
 
     public Result() {
@@ -61,6 +57,7 @@ public class Result {
     public void setNumberOfBins(int numberOfBins) {
         this.numberOfBins = numberOfBins;
     }
+
     public long getRuntime() {
         return runtime;
     }
@@ -90,7 +87,7 @@ public class Result {
         System.out.println("Number of Bins: " + numberOfBins);
         System.out.println("Runtime: " + runtime + "ms");
         System.out.println("Bin Fullness: " + String.format("%.3f", binFullness) + "%");
-        System.out.println("Fairness of Packing: " +  String.format("%.3f", fairnessOfPacking));
+        System.out.println("Fairness of Packing: " + String.format("%.3f", fairnessOfPacking));
     }
 
     public JFrame plotGraph(ArrayList<ItemFactory> bins) {

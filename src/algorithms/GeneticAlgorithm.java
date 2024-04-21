@@ -4,12 +4,7 @@ import factories.ItemFactory;
 import objects.Problem;
 import objects.Solution;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class GeneticAlgorithm implements Algorithm {
     private int populationSize;

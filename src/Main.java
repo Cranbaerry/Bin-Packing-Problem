@@ -1,21 +1,24 @@
-import java.io.*;
+import algorithms.Algorithm;
+import algorithms.GeneticAlgorithm;
+import factories.ItemFactory;
+import objects.Problem;
+import objects.Result;
+import objects.Solution;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import objects.Result;
-
-import algorithms.Algorithm;
-import algorithms.GeneticAlgorithm;
-//import algorithms.ParticleSwarmOptimization;
-//import algorithms.FireFlyAlgorithm;
-import factories.ItemFactory;
-import objects.Problem;
-import objects.Solution;
-
 public class Main {
+    public static final String PROBLEM_FILEPATH = "BPP.txt";
+    public static final String RESULTS_FILEPATH = "results.csv";
     public static void main(String[] args) {
-        String filename = "BPP.txt";
-        List<Problem> problems = readBinPackingProblems(filename);
+        List<Problem> problems = readBinPackingProblems(PROBLEM_FILEPATH);
+        List<Result> results = new ArrayList<>();
         for (Problem problem : problems) {
             // Print problems
             System.out.println("Problem Name: " + problem.getName());
@@ -31,6 +34,7 @@ public class Main {
             Result result = solution.evaluateResult(problem.getName(), algorithmName);
             result.printOut();
             result.plotGraph(bins);
+            results.add(result);
 
             // Other algorithms goes here
 
@@ -38,6 +42,9 @@ public class Main {
             // Put this at the end for spacing new line
             System.out.println();
         }
+
+        // Write results to CSV
+        saveResults(results, RESULTS_FILEPATH);
     }
 
     public static List<Problem> readBinPackingProblems(String filename) {
@@ -79,5 +86,28 @@ public class Main {
             e.printStackTrace();
         }
         return problems;
+    }
+
+    public static void saveResults(List<Result> results, String csvFile) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(csvFile))) {
+            bw.write("Problem Name,Algorithm,Execution Time (ms),Number Of Bins,Bin Fullness (%),Fairness Of Packing");
+            bw.newLine();
+
+            for (Result result : results) {
+                String csvLine = String.format(
+                        "\"%s\",%s,%d,%d,%.3f,%.3f",
+                        result.getProblemName().replaceAll("\"", "\"\""),
+                        result.getAlgorithmName(),
+                        result.getRuntime(),
+                        result.getNumberOfBins(),
+                        result.getBinFullness(),
+                        result.getFairnessOfPacking()
+                );
+                bw.write(csvLine);
+                bw.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
