@@ -89,8 +89,8 @@ public class Result {
         System.out.println("Result for algorithm: " + algorithmName);
         System.out.println("Number of Bins: " + numberOfBins);
         System.out.println("Runtime: " + runtime + "ms");
-        System.out.println("Bin Fullness: " + binFullness + "%");
-        System.out.println("Fairness of Packing: " + fairnessOfPacking);
+        System.out.println("Bin Fullness: " + String.format("%.3f", binFullness) + "%");
+        System.out.println("Fairness of Packing: " +  String.format("%.3f", fairnessOfPacking));
     }
 
     public JFrame plotGraph(ArrayList<ItemFactory> bins) {
