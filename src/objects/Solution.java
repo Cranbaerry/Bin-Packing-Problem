@@ -20,8 +20,10 @@ public class Solution {
 
     public Result evaluateResult(String problemName, String algorithmName) {
         Result result = new Result();
-        result.setAlgorithmName(algorithmName);
         result.setProblemName(problemName);
+        result.setNumberOfItems(this.problem.getNumberOfItems());
+        result.setBinCapacity(this.problem.getCapacity());
+        result.setAlgorithmName(algorithmName);
         result.setNumberOfBins(this.bins.getNumberOfBins());
         result.setRuntime(this.getTotalRuntime());
         result.setBinFullness(this.bins.getBinFullness());

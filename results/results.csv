@@ -1,11 +1,11 @@
-Problem Name,Algorithm,Execution Time (ms),Number Of Bins,Bin Fullness (%),Fairness Of Packing
-"TEST0049",Genetic Algorithm,88,12,91.617,0.085
-"TEST0049",Firefly Algorithm,98,11,96.547,0.038
-"TEST0014",Genetic Algorithm,28,26,88.450,0.096
-"TEST0014",Firefly Algorithm,178,25,88.074,0.092
-"TEST0082",Genetic Algorithm,21,28,85.608,0.121
-"TEST0082",Firefly Algorithm,194,27,87.003,0.106
-"TEST0044",Genetic Algorithm,36,15,93.326,0.057
-"TEST0044",Firefly Algorithm,222,14,93.914,0.044
-"TEST0030",Genetic Algorithm,27,30,89.988,0.095
-"TEST0030",Firefly Algorithm,198,30,87.511,0.101
+Problem Name, Number of Items, Bin Capacity, Algorithm,Execution Time (ms),Number Of Bins,Bin Fullness (%),Fairness Of Packing
+"TEST0049",43, 10000, Firefly Algorithm,47,11,94.282,0.051
+"TEST0049",43, 10000, Genetic Algorithm,61,12,91.617,0.037
+"TEST0014",47, 10000, Firefly Algorithm,491,37,89.398,0.094
+"TEST0014",47, 10000, Genetic Algorithm,122,37,91.868,0.091
+"TEST0082",48, 10000, Firefly Algorithm,835,66,86.874,0.103
+"TEST0082",48, 10000, Genetic Algorithm,69,66,87.820,0.123
+"TEST0044",56, 10000, Firefly Algorithm,1221,80,88.894,0.120
+"TEST0044",56, 10000, Genetic Algorithm,174,80,89.950,0.093
+"TEST0030",55, 10000, Firefly Algorithm,1565,113,86.989,0.125
+"TEST0030",55, 10000, Genetic Algorithm,271,112,88.354,0.099

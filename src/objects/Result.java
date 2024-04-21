@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class Result {
     private String algorithmName, problemName;
-    private int numberOfBins;
+    private int numberOfBins, numberOfItems, binCapacity;
     private long runtime;
     private double binFullness;
     private double fairnessOfPacking;
@@ -40,6 +40,22 @@ public class Result {
 
     public void setAlgorithmName(String algorithmName) {
         this.algorithmName = algorithmName;
+    }
+
+    public int getNumberOfItems() {
+        return numberOfItems;
+    }
+
+    public void setNumberOfItems(int numberOfItems) {
+        this.numberOfItems = numberOfItems;
+    }
+
+    public int getBinCapacity() {
+        return binCapacity;
+    }
+
+    public void setBinCapacity(int binCapacity) {
+        this.binCapacity = binCapacity;
     }
 
     public String getProblemName() {

@@ -59,7 +59,7 @@ public class GeneticAlgorithm implements Algorithm {
                 counter = 0;
             }
         }
-        System.out.println("Generation : " + generation);
+        // System.out.println("Generation : " + generation);
         // Convert solution to list of bins
         fittestChromosome = Collections.min(population, Comparator.comparing(Chromosome::getFitness));
         int currentBinCapacity = 0;

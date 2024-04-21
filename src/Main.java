@@ -1,61 +1,58 @@
 import algorithms.Algorithm;
-import algorithms.GeneticAlgorithm;
 import algorithms.FireFlyAlgorithm;
+import algorithms.GeneticAlgorithm;
 import factories.ItemFactory;
 import objects.Problem;
 import objects.Result;
 import objects.Solution;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Main {
     public static final String PROBLEM_FILEPATH = "BPP.txt";
     public static final String RESULTS_FILEPATH = "results/results.csv";
+
     public static void main(String[] args) {
         List<Problem> problems = readBinPackingProblems(PROBLEM_FILEPATH);
         List<Result> results = new ArrayList<>();
+        Map<String, Algorithm> algorithms = new HashMap<>();
+        algorithms.put("Genetic Algorithm", new GeneticAlgorithm());
+        algorithms.put("Firefly Algorithm", new FireFlyAlgorithm());
+        // TODO: Add other algorithms here
+
+        System.out.println("Bin Packing Problem Solver");
+        System.out.printf("Found %d problems in %s%n", problems.size(), PROBLEM_FILEPATH);
+        System.out.printf("Using %d algorithms:%n", algorithms.size());
+        for (String algorithmName : algorithms.keySet()) {
+            System.out.printf("- %s%n", algorithmName);
+        }
         for (Problem problem : problems) {
-            // Print problems
-            System.out.println("Problem Name: " + problem.getName());
-            System.out.println("Number of Items: " + problem.getNumberOfItems());
-            System.out.println("Bin Capacity: " + problem.getCapacity());
-            System.out.println();
+            System.out.printf("%nSolving problem %s with %d items and bin capacity %d..%n",
+                    problem.getName(), problem.getNumberOfItems(), problem.getCapacity());
 
-            // Solve the problem with a genetic algorithm
-            String algorithmName = "Genetic Algorithm";
-            Algorithm geneticAlgorithm = new GeneticAlgorithm();
-            Solution solution = geneticAlgorithm.solve(problem);
-            ArrayList<ItemFactory> bins = solution.bins.getBins();
-            Result result = solution.evaluateResult(problem.getName(), algorithmName);
-            result.printOut();
-            result.plotGraph(bins);
-            results.add(result);
-            
-            algorithmName = "Firefly Algorithm";
-            Algorithm fireflyAlgorithm = new FireFlyAlgorithm();
-            solution = fireflyAlgorithm.solve(problem);
-            bins = solution.bins.getBins();
-            result = solution.evaluateResult(problem.getName(), algorithmName);
-            result.printOut();
-            result.plotGraph(bins);
-            results.add(result);
+            for (Map.Entry<String, Algorithm> entry : algorithms.entrySet()) {
+                String algorithmName = entry.getKey();
+                Algorithm algorithm = entry.getValue();
 
-
-            // Other algorithms goes here
-
-
-            // Put this at the end for spacing new line
-            System.out.println();
+                Solution solution = algorithm.solve(problem);
+                ArrayList<ItemFactory> bins = solution.bins.getBins();
+                Result result = solution.evaluateResult(problem.getName(), algorithmName);
+                // result.printOut(); // Commented out to reduce output
+                result.plotGraph(bins);
+                results.add(result);
+                System.out.print("✔ Finished " + algorithmName + " in " + result.getRuntime() + "ms\n");
+            }
         }
 
-        // Write results to CSV
         saveResults(results, RESULTS_FILEPATH);
+
+        long totalRuntime = results.stream().mapToLong(Result::getRuntime).sum();
+        System.out.printf("%nAll problems solved in %dms%n", totalRuntime);
+        System.out.println("Results saved to " + RESULTS_FILEPATH);
     }
 
     public static List<Problem> readBinPackingProblems(String filename) {
@@ -101,13 +98,15 @@ public class Main {
 
     public static void saveResults(List<Result> results, String csvFile) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(csvFile))) {
-            bw.write("Problem Name,Algorithm,Execution Time (ms),Number Of Bins,Bin Fullness (%),Fairness Of Packing");
+            bw.write("Problem Name, Number of Items, Bin Capacity, Algorithm,Execution Time (ms),Number Of Bins,Bin Fullness (%),Fairness Of Packing");
             bw.newLine();
 
             for (Result result : results) {
                 String csvLine = String.format(
-                        "\"%s\",%s,%d,%d,%.3f,%.3f",
+                        "\"%s\",%d, %d, %s,%d,%d,%.3f,%.3f",
                         result.getProblemName().replaceAll("\"", "\"\""),
+                        result.getNumberOfItems(),
+                        result.getBinCapacity(),
                         result.getAlgorithmName(),
                         result.getRuntime(),
                         result.getNumberOfBins(),
