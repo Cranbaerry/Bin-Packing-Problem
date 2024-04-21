@@ -84,8 +84,8 @@ public class Main {
 //            }
 //            System.out.println();
             
-            JFrame frame2 = plotBins(bins2, problem.getName(),"PSO");
-            String filePaths = "results/problem_" + problem.getName() + " PSO "+ ".png";
+            JFrame frame2 = plotBins(bins2, problem.getName(),"Firefly");
+            String filePaths = "results/problem_" + problem.getName() + " Firefly "+ ".png";
             saveFrameAsImage(frame2, filePaths);
             System.out.println("Image saved to: " + filePaths);
 //            break;

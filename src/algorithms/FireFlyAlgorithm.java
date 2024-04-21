@@ -13,7 +13,7 @@ import java.util.Random;
 
 public class FireFlyAlgorithm implements Algorithm {
     private int populationSize;
-    private double attractivenessBase;
+//    private double attractivenessBase;
     private double alpha;
     private double beta;
     private double gamma;
@@ -23,10 +23,10 @@ public class FireFlyAlgorithm implements Algorithm {
     public FireFlyAlgorithm() {
         // Initializing custom parameters
         this.populationSize = 100;
-        this.attractivenessBase = 0.1;
-        this.alpha = 0.5;
-        this.beta = 1.0;
-        this.gamma = 0.1;
+//        this.attractivenessBase = 0.1;
+        this.alpha = 0.25;
+        this.beta = 0.8;
+        this.gamma = 1;
         items = new ArrayList<Integer>();
     }
 
@@ -47,10 +47,22 @@ public class FireFlyAlgorithm implements Algorithm {
         	population.add(new Firefly(createFireFlies(items, Firefly_Position),binCapacity));
         }
         
-        int iteration=0;
-        while (solution.getCurrentRuntime() < timeLimit * 1000L) {
-        	Collections.sort(population, (c1, c2) -> Integer.compare(c1.getFitness(), c2.getFitness()));
+        int iteration= 0;
+        int bestFitness = 1000;
+        boolean Converge = false;
+        int unchangedCount = 0;
+        int maxUnchangedIterations = 100000;
+        while (Converge!=true) {
+        	Collections.sort(population, (c1, c2) -> Integer.compare(c1.getFitness(), c2.getFitness()));  	
         	population = moveFireflies(population);
+//        	System.out.println("bestFitness: " + population.get(0).getFitness());
+        	if(population.get(0).getFitness()<bestFitness) {
+        		bestFitness = population.get(0).getFitness();
+        		unchangedCount = 0;
+        	}else {
+                unchangedCount++;}
+        	if (unchangedCount >= maxUnchangedIterations) {
+                Converge = true; }
         	iteration++;
         }
         
@@ -100,7 +112,9 @@ public class FireFlyAlgorithm implements Algorithm {
     				
                     for (int i = 0; i < current.getPosition().size(); i++) {
                         if (random.nextDouble() < betaAttractiveness) {
-                            int newPosition = current.getPosition().get(i) + (int) moveProb;
+                            int newPosition = current.getPosition().get(i) 
+                            					+ (int) (betaAttractiveness * (other.getPosition().get(i)- current.getPosition().get(i)))
+                            					+ (int) moveProb;
                             current.getPosition().set(i, newPosition);
                         }
                     }
