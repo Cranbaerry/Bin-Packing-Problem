@@ -17,7 +17,7 @@ public class Main {
         String filename = "BPP.txt";
         List<Problem> problems = readBinPackingProblems(filename);
         for (Problem problem : problems) {
-            // Prin problems
+            // Print problems
             System.out.println("Problem Name: " + problem.getName());
             System.out.println("Number of Items: " + problem.getNumberOfItems());
             System.out.println("Bin Capacity: " + problem.getCapacity());
@@ -53,7 +53,9 @@ public class Main {
                         problems.add(problem);
                     }
                     problem = new Problem();
-                    problem.setName(line.substring(1).trim());
+                    String name = line.substring(1).trim();
+                    name = name.substring(0, name.length() - 1); // Remove the last '
+                    problem.setName(name);
                 } else {
                     // Reading problem data
                     if (problem != null) {
