@@ -15,7 +15,7 @@ import java.util.List;
 
 public class Main {
     public static final String PROBLEM_FILEPATH = "BPP.txt";
-    public static final String RESULTS_FILEPATH = "results.csv";
+    public static final String RESULTS_FILEPATH = "results/results.csv";
     public static void main(String[] args) {
         List<Problem> problems = readBinPackingProblems(PROBLEM_FILEPATH);
         List<Result> results = new ArrayList<>();

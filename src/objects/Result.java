@@ -130,7 +130,7 @@ public class Result {
         frame.pack();
         frame.setVisible(true);
 
-        String filePath = "results/problem_" + problemName + " " + algorithmName + ".png";
+        String filePath = String.format("results/%s/%s.png", algorithmName, problemName);
         saveFrameAsImage(frame, filePath);
         return frame;
     }
