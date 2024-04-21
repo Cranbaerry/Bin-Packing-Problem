@@ -1,94 +1,42 @@
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import java.awt.*;
-import java.awt.image.BufferedImage;
+import objects.Result;
 
-import javax.imageio.ImageIO;
-import javax.swing.*;
-
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.CategoryAxis;
-import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.renderer.category.StackedBarRenderer;
-import org.jfree.data.category.DefaultCategoryDataset;
 import algorithms.Algorithm;
 import algorithms.GeneticAlgorithm;
-import algorithms.ParticleSwarmOptimization;
-import algorithms.FireFlyAlgorithm;
+//import algorithms.ParticleSwarmOptimization;
+//import algorithms.FireFlyAlgorithm;
 import factories.ItemFactory;
 import objects.Problem;
 import objects.Solution;
-
 
 public class Main {
     public static void main(String[] args) {
         String filename = "BPP.txt";
         List<Problem> problems = readBinPackingProblems(filename);
         for (Problem problem : problems) {
+            // Print problems
             System.out.println("Problem Name: " + problem.getName());
             System.out.println("Number of Items: " + problem.getNumberOfItems());
             System.out.println("Bin Capacity: " + problem.getCapacity());
-            // System.out.println("Items:");
-            // HashMap<Integer, Integer> problemItems = problem.items.getItems();
-            // for (int weight : problemItems.keySet()) {
-            //    System.out.println("Weight: " + weight + ", Quantity: " + problemItems.get(weight));
-            // }
             System.out.println();
 
             // Solve the problem with a genetic algorithm
+            String algorithmName = "Genetic Algorithm";
             Algorithm geneticAlgorithm = new GeneticAlgorithm();
-            Solution solution = geneticAlgorithm.solve(problem, 3); // 5 seconds timeout
-            System.out.println("Genetic Algorithm Solution:");
-            System.out.println("Runtime: " + solution.getTotalRuntime() + " ms");
-            System.out.println("Total bins used: " + solution.bins.getNumberOfBins());
-            System.out.println("Bins:");
+            Solution solution = geneticAlgorithm.solve(problem);
             ArrayList<ItemFactory> bins = solution.bins.getBins();
-//            plotBins(bins, problem.getName(),"Genetic Algorithm");
-//            for (int i = 0; i < bins.size(); i++) {
-//                System.out.println("Bin " + (i + 1) + ":");
-//                ItemFactory items = bins.get(i);
-//                HashMap<Integer, Integer> binItems = items.getItems();
-//                for (int weight : binItems.keySet()) {
-//                    System.out.println("Weight: " + weight + ", Quantity: " + binItems.get(weight));
-//                }
-//            }
-//            System.out.println();
-            
-            JFrame frame = plotBins(bins, problem.getName(),"Genetic Algorithm");
-            String filePath = "results/problem_" + problem.getName() + " Genetic Algorithm"+ ".png";
-            saveFrameAsImage(frame, filePath);
-            System.out.println("Image saved to: " + filePath);      
-            
-            Algorithm Fire = new FireFlyAlgorithm();
-            Solution solution2 = Fire.solve(problem, 3); // 5 seconds timeout
-            System.out.println("Firefly Algorithm Solution:");
-            System.out.println("Runtime: " + solution2.getTotalRuntime() + " ms");
-            System.out.println("Total bins used: " + solution2.bins.getNumberOfBins());
-            System.out.println("Bins:");
-            ArrayList<ItemFactory> bins2 = solution2.bins.getBins();
-//            plotBins(bins, problem.getName(),"Genetic Algorithm");
-//            for (int i = 0; i < bins.size(); i++) {
-//                System.out.println("Bin " + (i + 1) + ":");
-//                ItemFactory items = bins.get(i);
-//                HashMap<Integer, Integer> binItems = items.getItems();
-//                for (int weight : binItems.keySet()) {
-//                    System.out.println("Weight: " + weight + ", Quantity: " + binItems.get(weight));
-//                }
-//            }
-//            System.out.println();
-            
-            JFrame frame2 = plotBins(bins2, problem.getName(),"PSO");
-            String filePaths = "results/problem_" + problem.getName() + " PSO "+ ".png";
-            saveFrameAsImage(frame2, filePaths);
-            System.out.println("Image saved to: " + filePaths);
-//            break;
+            Result result = solution.evaluateResult(problem.getName(), algorithmName);
+            result.printOut();
+            result.plotGraph(bins);
+
+            // Other algorithms goes here
+
+
+            // Put this at the end for spacing new line
+            System.out.println();
         }
     }
 
@@ -105,7 +53,9 @@ public class Main {
                         problems.add(problem);
                     }
                     problem = new Problem();
-                    problem.setName(line.substring(1).trim());
+                    String name = line.substring(1).trim();
+                    name = name.substring(0, name.length() - 1); // Remove the last '
+                    problem.setName(name);
                 } else {
                     // Reading problem data
                     if (problem != null) {
@@ -130,120 +80,4 @@ public class Main {
         }
         return problems;
     }
-    
-    // Plotting method
-//    public static void plotBins(ArrayList<ItemFactory> bins,String probName, String algorithm) {
-//        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-//        int itemIndex = 1;
-//        for (ItemFactory bin : bins) {
-//            HashMap<Integer, Integer> binItems = bin.getItems();
-//            Iterator<Map.Entry<Integer, Integer>> iterator = binItems.entrySet().iterator();
-//            while (iterator.hasNext()) {
-//                Map.Entry<Integer, Integer> entry = iterator.next();
-//                int weight = entry.getKey();
-//                int count = entry.getValue();
-//                int totalWeight = weight * count; // Adjusted for total weight
-//                dataset.addValue(totalWeight, "Item " + itemIndex, "Bin " + (bins.indexOf(bin) + 1));
-//                itemIndex++;
-//            }
-//        }
-//
-//        JFreeChart chart = ChartFactory.createStackedBarChart("Bins for " + probName + " using " + algorithm, "Bin", "Weight", dataset);
-//        CategoryPlot plot = chart.getCategoryPlot();
-//        plot.setRangePannable(true);
-//
-//        StackedBarRenderer renderer = new StackedBarRenderer();
-//        for (int i = 0; i < bins.size(); i++) {
-//            renderer.setSeriesPaint(i, getRandomColor());
-//        }
-//        plot.setRenderer(renderer);
-//
-//        CategoryAxis xAxis = plot.getDomainAxis();
-//        xAxis.setCategoryMargin(0.1);
-//
-//        chart.getLegend().setVisible(false); // Disable legend
-//
-//        ChartPanel chartPanel = new ChartPanel(chart);
-//        JFrame frame = new JFrame("Bins");
-//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//        frame.setLayout(new BorderLayout());
-//        frame.add(chartPanel, BorderLayout.CENTER);
-//        frame.pack();
-//        frame.setVisible(true);
-//    }
-
-    // Method to generate random colors
-//    private static Color getRandomColor() {
-//        return new Color((int) (Math.random() * 256), (int) (Math.random() * 256), (int) (Math.random() * 256));
-//    }
-    
-    public static JFrame plotBins(ArrayList<ItemFactory> bins,String probName, String algorithm) {
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        int itemIndex = 1;
-        for (ItemFactory bin : bins) {
-            HashMap<Integer, Integer> binItems = bin.getItems();
-            Iterator<Map.Entry<Integer, Integer>> iterator = binItems.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<Integer, Integer> entry = iterator.next();
-                int weight = entry.getKey();
-                int count = entry.getValue();
-                int totalWeight = weight * count; // Adjusted for total weight
-                dataset.addValue(totalWeight, "Item " + itemIndex, "Bin " + (bins.indexOf(bin) + 1));
-                itemIndex++;
-            }
-        }
-
-        JFreeChart chart = ChartFactory.createStackedBarChart("Bins for " + probName + " using " + algorithm, "Bin", "Weight", dataset);
-        CategoryPlot plot = chart.getCategoryPlot();
-        plot.setRangePannable(true);
-
-        StackedBarRenderer renderer = new StackedBarRenderer();
-        for (int i = 0; i < bins.size(); i++) {
-            renderer.setSeriesPaint(i, getRandomColor());
-        }
-        plot.setRenderer(renderer);
-
-        CategoryAxis xAxis = plot.getDomainAxis();
-        xAxis.setCategoryMargin(0.1);
-
-        chart.getLegend().setVisible(false); // Disable default legend
-
-        // Custom legend
-        // Combine chart panel and legend panel into one frame
-        JFrame frame = new JFrame("Bins");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setLayout(new BorderLayout());
-        frame.add(new ChartPanel(chart), BorderLayout.CENTER);
-        frame.pack();
-        frame.setVisible(true);
-        
-        return frame;
-    }
-
-    // Method to generate random colors
-    private static Color getRandomColor() {
-        return new Color((int) (Math.random() * 256), (int) (Math.random() * 256), (int) (Math.random() * 256));
-    }
-
-    // Method to save the frame as an image file
-    private static void saveFrameAsImage(JFrame frame, String filePath) {
-        try {
-            File file = new File(filePath);
-            File parentDir = file.getParentFile();
-            if (!parentDir.exists()) {
-                if (!parentDir.mkdirs()) {
-                    throw new IOException("Failed to create directory: " + parentDir.getAbsolutePath());
-                }
-            }
-
-            BufferedImage image = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_RGB);
-            Graphics2D graphics2D = image.createGraphics();
-            frame.paint(graphics2D);
-            ImageIO.write(image, "png", file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    
 }
