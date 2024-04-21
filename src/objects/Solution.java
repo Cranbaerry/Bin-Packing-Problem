@@ -1,7 +1,6 @@
 package objects;
 
 import factories.BinFactory;
-import factories.ItemFactory;
 
 public class Solution {
     public BinFactory bins;
@@ -19,10 +18,24 @@ public class Solution {
         return this;
     }
 
+    public Result evaluateResult(String problemName, String algorithmName) {
+        Result result = new Result();
+        result.setAlgorithmName(algorithmName);
+        result.setProblemName(problemName);
+        result.setNumberOfBins(this.bins.getNumberOfBins());
+        result.setRuntime(this.getTotalRuntime());
+        result.setBinFullness(this.bins.getBinFullness());
+        result.setFairnessOfPacking(this.bins.getBinFullnessStdDev());
+
+        return result;
+    }
+
     public long getCurrentRuntime() {
         return System.currentTimeMillis() - this.startTime;
     }
+
     public long getTotalRuntime() {
         return endTime;
     }
 }
+
