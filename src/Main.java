@@ -24,6 +24,7 @@ public class Main {
         algorithms.put("Genetic Algorithm", new GeneticAlgorithm());
         algorithms.put("Firefly Algorithm", new FireFlyAlgorithm());
         algorithms.put("Tabu Search Algorithm", new TabuSearchAlgorithm());
+        algorithms.put("First Fit Descending", new FirstFitDescending());
         // algorithms.put("Dynamic Tabu Search Algorithm", new DynamicTabuSearchAlgorithm());
         // algorithms.put("Simulated Annealing Algorithm", new SimulatedAnnealingAlgorithm());
         // TODO: Add other algorithms here
