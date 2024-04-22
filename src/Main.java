@@ -1,6 +1,7 @@
 import algorithms.Algorithm;
 import algorithms.FireFlyAlgorithm;
 import algorithms.GeneticAlgorithm;
+import algorithms.TabuSearchAlgorithm;
 import factories.ItemFactory;
 import objects.Problem;
 import objects.Result;
@@ -16,12 +17,15 @@ public class Main {
     public static final String PROBLEM_FILEPATH = "BPP.txt";
     public static final String RESULTS_FILEPATH = "results/results.csv";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws CloneNotSupportedException {
         List<Problem> problems = readBinPackingProblems(PROBLEM_FILEPATH);
         List<Result> results = new ArrayList<>();
         Map<String, Algorithm> algorithms = new HashMap<>();
         algorithms.put("Genetic Algorithm", new GeneticAlgorithm());
         algorithms.put("Firefly Algorithm", new FireFlyAlgorithm());
+        algorithms.put("Tabu Search Algorithm", new TabuSearchAlgorithm());
+        // algorithms.put("Dynamic Tabu Search Algorithm", new DynamicTabuSearchAlgorithm());
+        // algorithms.put("Simulated Annealing Algorithm", new SimulatedAnnealingAlgorithm());
         // TODO: Add other algorithms here
 
         System.out.println("Bin Packing Problem Solver");
@@ -41,7 +45,8 @@ public class Main {
                 Solution solution = algorithm.solve(problem);
                 ArrayList<ItemFactory> bins = solution.bins.getBins();
                 Result result = solution.evaluateResult(problem.getName(), algorithmName);
-                // result.printOut(); // Commented out to reduce output
+                result.printOut(); // Commented out to reduce output
+
                 result.plotGraph(bins);
                 results.add(result);
                 System.out.print("✔ Finished " + algorithmName + " in " + result.getRuntime() + "ms\n");

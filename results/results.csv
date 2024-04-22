@@ -1,11 +1,16 @@
 Problem Name, Number of Items, Bin Capacity, Algorithm,Execution Time (ms),Number Of Bins,Bin Fullness (%),Fairness Of Packing
-"TEST0049",43, 10000, Firefly Algorithm,47,11,94.282,0.051
-"TEST0049",43, 10000, Genetic Algorithm,61,12,91.617,0.037
-"TEST0014",47, 10000, Firefly Algorithm,491,37,89.398,0.094
-"TEST0014",47, 10000, Genetic Algorithm,122,37,91.868,0.091
-"TEST0082",48, 10000, Firefly Algorithm,835,66,86.874,0.103
-"TEST0082",48, 10000, Genetic Algorithm,69,66,87.820,0.123
-"TEST0044",56, 10000, Firefly Algorithm,1221,80,88.894,0.120
-"TEST0044",56, 10000, Genetic Algorithm,174,80,89.950,0.093
-"TEST0030",55, 10000, Firefly Algorithm,1565,113,86.989,0.125
-"TEST0030",55, 10000, Genetic Algorithm,271,112,88.354,0.099
+"TEST0049",43, 10000, Firefly Algorithm,17,11,94.700,0.038
+"TEST0049",43, 10000, Genetic Algorithm,61,12,91.617,0.110
+"TEST0049",43, 10000, Tabu Search Algorithm,122,11,94.689,0.039
+"TEST0014",47, 10000, Firefly Algorithm,220,25,88.340,0.075
+"TEST0014",47, 10000, Genetic Algorithm,31,26,88.450,0.072
+"TEST0014",47, 10000, Tabu Search Algorithm,148,26,88.082,0.082
+"TEST0082",48, 10000, Firefly Algorithm,205,27,87.196,0.133
+"TEST0082",48, 10000, Genetic Algorithm,34,28,85.608,0.098
+"TEST0082",48, 10000, Tabu Search Algorithm,145,27,86.032,0.117
+"TEST0044",56, 10000, Firefly Algorithm,238,14,94.576,0.044
+"TEST0044",56, 10000, Genetic Algorithm,35,15,93.326,0.116
+"TEST0044",56, 10000, Tabu Search Algorithm,32,15,91.982,0.075
+"TEST0030",55, 10000, Firefly Algorithm,235,30,87.509,0.104
+"TEST0030",55, 10000, Genetic Algorithm,31,30,89.988,0.084
+"TEST0030",55, 10000, Tabu Search Algorithm,82,30,87.258,0.103

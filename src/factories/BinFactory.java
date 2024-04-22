@@ -2,7 +2,7 @@ package factories;
 
 import java.util.ArrayList;
 
-public class BinFactory {
+public class BinFactory implements Cloneable {
     private ArrayList<ItemFactory> bins;
     private int maxCapacity;
 
@@ -38,6 +38,26 @@ public class BinFactory {
         return fullness / bins.size() * 100;
     }
 
+    public double getTotalWeight() {
+        int totalWeight = 0;
+        for (ItemFactory bin : bins) {
+            totalWeight += bin.getTotalWeight();
+        }
+        return totalWeight;
+    }
+
+    // SwapItem between two bins
+    public void swapItem(int binIndex1, int binIndex2, int itemIndex1, int itemIndex2) {
+        ItemFactory bin1 = bins.get(binIndex1);
+        ItemFactory bin2 = bins.get(binIndex2);
+        int weight1 = bin1.getItems().get(itemIndex1);
+        int weight2 = bin2.getItems().get(itemIndex2);
+        bin1.removeItem(weight1, 1);
+        bin2.removeItem(weight2, 1);
+        bin1.addItem(weight2, 1);
+        bin2.addItem(weight1, 1);
+    }
+
     public double getBinFullnessVariance() {
         // First calculate the mean (average) fullness of bins
         double meanFullness = 0;
@@ -61,5 +81,14 @@ public class BinFactory {
 
     public double getBinFullnessStdDev() {
         return Math.sqrt(getBinFullnessVariance());
+    }
+
+    @Override
+    public BinFactory clone() {
+        BinFactory clone = new BinFactory(this.maxCapacity);
+        for (ItemFactory bin : bins) {
+            clone.bins.add(bin.clone());
+        }
+        return clone;
     }
 }

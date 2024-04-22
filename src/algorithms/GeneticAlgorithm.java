@@ -28,13 +28,7 @@ public class GeneticAlgorithm implements Algorithm {
     public Solution solve(Problem problem) {
         Solution solution = new Solution(problem); // This should be at the top, it initializes the runtime timer
         this.binCapacity = problem.getCapacity();
-        HashMap<Integer, Integer> problemItems = problem.items.getItems();
-        for (int weight : problemItems.keySet()) { // convert hashmap into array of integers
-            for (int i = 0; i < problemItems.get(weight); i++) {
-                items.add(weight);
-            }
-        }
-
+        this.items = problem.items.flatten();
         int chromosomeLength = items.size();
 
         // Initialize population

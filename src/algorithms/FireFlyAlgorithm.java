@@ -28,18 +28,11 @@ public class FireFlyAlgorithm implements Algorithm {
     public Solution solve(Problem problem) {
         Solution solution = new Solution(problem);
         this.binCapacity = problem.getCapacity();
-
-        HashMap<Integer, Integer> problemItems = problem.items.getItems();
-        for (int weight : problemItems.keySet()) { // convert hashmap into array of integers
-            for (int i = 0; i < problemItems.get(weight); i++) {
-                items.add(weight);
-            }
-        }
-
-        int Firefly_Position = items.size();
+        this.items = problem.items.flatten();
+        int fireFlyPosition = items.size();
         List<Firefly> population = new ArrayList<>();
         for (int i = 0; i < populationSize; i++) {
-            population.add(new Firefly(createFireFlies(items, Firefly_Position), binCapacity));
+            population.add(new Firefly(createFireFlies(items, fireFlyPosition), binCapacity));
         }
 
         int iteration = 0;

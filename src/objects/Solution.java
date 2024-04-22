@@ -2,15 +2,19 @@ package objects;
 
 import factories.BinFactory;
 
-public class Solution {
+public class Solution implements Cloneable {
     public BinFactory bins;
     private long startTime, endTime;
-    private Problem problem;
+    private final Problem problem;
 
     public Solution(Problem problem) {
         this.startTime = System.currentTimeMillis();
         this.problem = problem;
         this.bins = new BinFactory(problem.getCapacity());
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
     }
 
     public Solution finalizeResult() {
@@ -28,6 +32,7 @@ public class Solution {
         result.setRuntime(this.getTotalRuntime());
         result.setBinFullness(this.bins.getBinFullness());
         result.setFairnessOfPacking(this.bins.getBinFullnessStdDev());
+        result.setFitness(this.getFitness());
 
         return result;
     }
@@ -38,6 +43,19 @@ public class Solution {
 
     public long getTotalRuntime() {
         return endTime;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        Solution clone = (Solution) super.clone();
+        clone.bins = this.bins.clone();
+        return clone;
+    }
+
+    // Calculate the fitness as the ratio of the total weight to the number of bins.
+    public double getFitness() {
+        // return this.bins.getBinFullness();
+        return this.bins.getTotalWeight() / this.bins.getNumberOfBins();
     }
 }
 

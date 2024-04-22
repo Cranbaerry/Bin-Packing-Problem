@@ -26,12 +26,15 @@ public class Result {
     private long runtime;
     private double binFullness;
     private double fairnessOfPacking;
+    private double solutionFitness;
 
     public Result() {
         this.algorithmName = "";
         this.numberOfBins = 0;
         this.runtime = 0;
         this.binFullness = 0;
+        this.fairnessOfPacking = 0;
+        this.solutionFitness = 0;
     }
 
     public String getAlgorithmName() {
@@ -56,6 +59,14 @@ public class Result {
 
     public void setBinCapacity(int binCapacity) {
         this.binCapacity = binCapacity;
+    }
+
+    public double getFitness() {
+        return solutionFitness;
+    }
+
+    public void setFitness(double fitness) {
+        this.solutionFitness = fitness;
     }
 
     public String getProblemName() {
