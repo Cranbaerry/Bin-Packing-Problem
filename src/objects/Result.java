@@ -110,11 +110,12 @@ public class Result {
     }
 
     public void printOut() {
-        System.out.println("Result for algorithm: " + algorithmName);
-        System.out.println("Number of Bins: " + numberOfBins);
-        System.out.println("Runtime: " + runtime + "ms");
-        System.out.println("Bin Fullness: " + String.format("%.3f", binFullness) + "%");
-        System.out.println("Fairness of Packing: " + String.format("%.3f", fairnessOfPacking));
+        System.out.printf("Results for %s using %s%n", problemName, algorithmName);
+        System.out.printf("\uD83D\uDC49 Number of Bins: %d%n", numberOfBins);
+        System.out.printf("\uD83D\uDC49 Execution Time: %dms%n", runtime);
+        System.out.printf("\uD83D\uDC49 Bin Fullness: %.3f%n", binFullness);
+        System.out.printf("\uD83D\uDC49 Fairness of Packing: %.3f%n", fairnessOfPacking);
+        System.out.println();
     }
 
     public JFrame plotGraph(ArrayList<ItemFactory> bins) {

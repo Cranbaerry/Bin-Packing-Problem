@@ -48,10 +48,10 @@ public class TabuSearchAlgorithm implements Algorithm {
         try {
             Solution bestSolution = (Solution) currentSolution.clone();
             do {
-                List<Solution> neighbors = generateNeighbors(currentSolution, problem); // Generate non-tabu neighbors
+                List<Solution> neighbors = generateNeighbors(currentSolution, problem); // Generate neighbors
                 Solution bestNeighbor = getBestNeighbor(neighbors); // Find the best improving neighbor
                 if (bestNeighbor.getFitness() > bestSolution.getFitness()) {
-                    System.out.println("Iteration " + currentIteration + " Best Neighbor: " + bestNeighbor.getFitness() + " Best Solution: " + bestSolution.getFitness());
+                    //System.out.println("Iteration " + currentIteration + " Best Neighbor: " + bestNeighbor.getFitness() + " Best Solution: " + bestSolution.getFitness());
                     bestSolution = (Solution) bestNeighbor.clone(); // Update best solution
                     unchangedIterations = 0;
                     tabuTenure = Math.max(1, (int) (tabuTenure * 0.9)); // Decrease tenure on improvement

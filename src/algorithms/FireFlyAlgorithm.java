@@ -139,5 +139,8 @@ class Firefly {
             }
             currentBinCapacity += item;
         }
+        if (currentBinCapacity > 0) {
+            fitness++;
+        }
     }
 }

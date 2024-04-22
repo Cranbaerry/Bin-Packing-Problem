@@ -31,13 +31,14 @@ public class Main {
         System.out.println("Bin Packing Problem Solver");
         System.out.printf("Found %d problems in %s%n", problems.size(), PROBLEM_FILEPATH);
         System.out.printf("Using %d algorithms:%n", algorithms.size());
-        for (String algorithmName : algorithms.keySet()) {
-            System.out.printf("- %s%n", algorithmName);
-        }
-        for (Problem problem : problems) {
-            System.out.printf("%nSolving problem %s with %d items and bin capacity %d..%n",
-                    problem.getName(), problem.getNumberOfItems(), problem.getCapacity());
 
+        int index = 1;
+        for (Map.Entry<String, Algorithm> entry : algorithms.entrySet()) {
+            System.out.printf("%d. %s%n", index++, entry.getKey());
+        }
+
+        System.out.println();
+        for (Problem problem : problems) {
             for (Map.Entry<String, Algorithm> entry : algorithms.entrySet()) {
                 String algorithmName = entry.getKey();
                 Algorithm algorithm = entry.getValue();
@@ -45,18 +46,17 @@ public class Main {
                 Solution solution = algorithm.solve(problem);
                 ArrayList<ItemFactory> bins = solution.bins.getBins();
                 Result result = solution.evaluateResult(problem.getName(), algorithmName);
-                result.printOut(); // Commented out to reduce output
-
+                result.printOut();
                 result.plotGraph(bins);
                 results.add(result);
-                System.out.print("✔ Finished " + algorithmName + " in " + result.getRuntime() + "ms\n");
             }
         }
 
+        // Save results to CSV file
         saveResults(results, RESULTS_FILEPATH);
 
         long totalRuntime = results.stream().mapToLong(Result::getRuntime).sum();
-        System.out.printf("%nAll problems solved in %dms%n", totalRuntime);
+        System.out.printf("All problems solved in %dms%n", totalRuntime);
         System.out.println("Results saved to " + RESULTS_FILEPATH);
     }
 
