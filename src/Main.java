@@ -2,6 +2,7 @@ import algorithms.Algorithm;
 import algorithms.FireFlyAlgorithm;
 import algorithms.GeneticAlgorithm;
 import algorithms.TabuSearchAlgorithm;
+import algorithms.mFFD;
 import factories.ItemFactory;
 import objects.Problem;
 import objects.Result;
@@ -24,7 +25,7 @@ public class Main {
         algorithms.put("Genetic Algorithm", new GeneticAlgorithm());
         algorithms.put("Firefly Algorithm", new FireFlyAlgorithm());
         algorithms.put("Tabu Search Algorithm", new TabuSearchAlgorithm());
-        algorithms.put("First Fit Descending", new FirstFitDescending());
+        algorithms.put("Modified First Fit Descending", new mFFD());
         // algorithms.put("Dynamic Tabu Search Algorithm", new DynamicTabuSearchAlgorithm());
         // algorithms.put("Simulated Annealing Algorithm", new SimulatedAnnealingAlgorithm());
         // TODO: Add other algorithms here
