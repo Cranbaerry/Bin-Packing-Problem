@@ -76,6 +76,7 @@ public class mFFD implements Algorithm {
         		if(capacity + weight <= this.binCapacity) {
         			placed = true;
         			capacity += weight;
+        			entry.getKey().addItem(weight, 1);
         			entry.setValue(capacity);
         		}
         	}
@@ -84,6 +85,7 @@ public class mFFD implements Algorithm {
         	ItemFactory bin = new ItemFactory();
             bin.addItem(weight, 1);
             bins.put(bin, weight);
+           
         	
         }
         
@@ -94,6 +96,7 @@ public class mFFD implements Algorithm {
         		if(capacity + weight <= this.binCapacity) {
         			placed = true;
         			capacity += weight;
+        			entry.getKey().addItem(weight, 1);
         			entry.setValue(capacity);
         		}
         	}
@@ -112,6 +115,7 @@ public class mFFD implements Algorithm {
         		if(capacity + weight <= this.binCapacity) {
         			placed = true;
         			capacity += weight;
+        			entry.getKey().addItem(weight, 1);
         			entry.setValue(capacity);
         		}
         	}
@@ -124,6 +128,7 @@ public class mFFD implements Algorithm {
         }
         
         for(ItemFactory bin: bins.keySet()) {
+        	System.out.println(bin.getNumberOfItems());
         	solution.bins.createBin(bin);
         }
         
