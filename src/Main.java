@@ -1,8 +1,4 @@
-import algorithms.Algorithm;
-import algorithms.FireFlyAlgorithm;
-import algorithms.GeneticAlgorithm;
-import algorithms.TabuSearchAlgorithm;
-import algorithms.mFFD;
+import algorithms.*;
 import factories.ItemFactory;
 import objects.Problem;
 import objects.Result;

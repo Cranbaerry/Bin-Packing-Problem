@@ -3,11 +3,10 @@ package objects;
 import factories.ItemFactory;
 
 public class Problem {
+    public ItemFactory items;
     private String name;
     private int numberOfItems;
     private int capacity;
-
-    public ItemFactory items;
 
     public Problem() {
         items = new ItemFactory();

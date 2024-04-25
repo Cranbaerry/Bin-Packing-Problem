@@ -3,9 +3,9 @@ package objects;
 import factories.BinFactory;
 
 public class Solution implements Cloneable {
+    private final Problem problem;
     public BinFactory bins;
     private long startTime, endTime;
-    private final Problem problem;
 
     public Solution(Problem problem) {
         this.startTime = System.currentTimeMillis();
