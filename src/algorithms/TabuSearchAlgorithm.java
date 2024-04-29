@@ -27,11 +27,9 @@ public class TabuSearchAlgorithm implements Algorithm {
     private int maximumNeighbors;
 
     public TabuSearchAlgorithm() {
-        this.tabuTenure = 10;
         this.convergenceIterations = 50;
         this.maximumNeighbors = 50;
         this.binSizeThreshold = 10;
-        this.tabuList = new ArrayList<>();
     }
 
     @Override
@@ -40,6 +38,8 @@ public class TabuSearchAlgorithm implements Algorithm {
         this.currentIteration = 0;
         this.binCapacity = problem.getCapacity();
         this.items = problem.items.flatten();
+        this.tabuList = new ArrayList<>();
+        this.tabuTenure = 10;
 
         // Generate initial solution using first fit algorithm
         Solution currentSolution = firstFitSolution(this.items, problem);
@@ -208,7 +208,7 @@ public class TabuSearchAlgorithm implements Algorithm {
         if (tabuList.contains(solution)) return;
         tabuList.add(solution);
         if (tabuList.size() > tabuTenure) {
-            tabuList.removeFirst();
+            tabuList.remove(0);
         }
     }
 }

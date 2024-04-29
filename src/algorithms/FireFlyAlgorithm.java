@@ -22,7 +22,6 @@ public class FireFlyAlgorithm implements Algorithm {
         this.alpha = 0.5;
         this.beta = 1.0;
         this.gamma = 0.1;
-        items = new ArrayList<Integer>();
     }
 
     public Solution solve(Problem problem) {

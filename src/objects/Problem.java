@@ -5,11 +5,13 @@ import factories.ItemFactory;
 public class Problem {
     public ItemFactory items;
     private String name;
-    private int numberOfItems;
+    private int numberOfItems, numberOfData;
     private int capacity;
 
     public Problem() {
         items = new ItemFactory();
+        numberOfItems = 0;
+        numberOfData = 0;
     }
 
     public String getName() {
@@ -26,6 +28,14 @@ public class Problem {
 
     public void setNumberOfItems(int numberOfItems) {
         this.numberOfItems = numberOfItems;
+    }
+
+    public int getNumberOfData() {
+        return numberOfData;
+    }
+
+    public void setNumberOfData(int numberOfData) {
+        this.numberOfData = numberOfData;
     }
 
     public int getCapacity() {

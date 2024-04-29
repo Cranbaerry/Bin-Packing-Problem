@@ -18,17 +18,20 @@ public class Main {
         List<Problem> problems = readBinPackingProblems(PROBLEM_FILEPATH);
         List<Result> results = new ArrayList<>();
         Map<String, Algorithm> algorithms = new HashMap<>();
-        algorithms.put("Genetic Algorithm", new GeneticAlgorithm());
-        algorithms.put("Firefly Algorithm", new FireFlyAlgorithm());
-        algorithms.put("Tabu Search Algorithm", new TabuSearchAlgorithm());
-        algorithms.put("Modified First Fit Descending", new mFFD());
-        // algorithms.put("Dynamic Tabu Search Algorithm", new DynamicTabuSearchAlgorithm());
+        //algorithms.put("Genetic Algorithm", new GeneticAlgorithm());
+        //algorithms.put("Firefly Algorithm", new FireFlyAlgorithm());
+        //algorithms.put("Tabu Search Algorithm", new TabuSearchAlgorithm());
+        algorithms.put("Modified First Fit Descending", new ModifiedFirstFitDecreasingAlgorithm());
         // algorithms.put("Simulated Annealing Algorithm", new SimulatedAnnealingAlgorithm());
         // TODO: Add other algorithms here
 
         System.out.println("Bin Packing Problem Solver");
         System.out.printf("Found %d problems in %s%n", problems.size(), PROBLEM_FILEPATH);
-        System.out.printf("Using %d algorithms:%n", algorithms.size());
+//        for (Problem problem : problems) {
+//            System.out.printf("- %s with %d items & bin capacity of %d%n",
+//                    problem.getName(), problem.getNumberOfItems(), problem.getCapacity());
+//        }
+        System.out.printf("Using %d algorithm(s):%n", algorithms.size());
 
         int index = 1;
         for (Map.Entry<String, Algorithm> entry : algorithms.entrySet()) {
@@ -37,7 +40,8 @@ public class Main {
 
         System.out.println();
         for (Problem problem : problems) {
-            for (Map.Entry<String, Algorithm> entry : algorithms.entrySet()) {
+            for (Map.Entry<String,
+                    Algorithm> entry : algorithms.entrySet()) {
                 String algorithmName = entry.getKey();
                 Algorithm algorithm = entry.getValue();
 
@@ -75,10 +79,11 @@ public class Main {
                     name = name.substring(0, name.length() - 1); // Remove the last '
                     problem.setName(name);
                 } else {
-                    // Reading problem data
+                    // Reading problem d
+                    // ata
                     if (problem != null) {
-                        if (problem.getNumberOfItems() == 0) {
-                            problem.setNumberOfItems(Integer.parseInt(line.trim()));
+                        if (problem.getNumberOfData() == 0) {
+                            problem.setNumberOfData(Integer.parseInt(line.trim()));
                         } else if (problem.getCapacity() == 0) {
                             problem.setCapacity(Integer.parseInt(line.trim()));
                         } else {
@@ -86,10 +91,13 @@ public class Main {
                             int weight = Integer.parseInt(parts[0]);
                             int count = Integer.parseInt(parts[1]);
                             problem.items.addItem(weight, count);
+                            problem.setNumberOfItems(problem.getNumberOfItems() + count);
                         }
                     }
                 }
             }
+
+            // Add the last problem
             if (problem != null) {
                 problems.add(problem);
             }

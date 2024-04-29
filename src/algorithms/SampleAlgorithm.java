@@ -12,13 +12,14 @@ public class SampleAlgorithm implements Algorithm {
     private double crossoverRate;
     private int elitismCount;
 
-
     public SampleAlgorithm() {
         // Initialize custom parameters here
         this.populationSize = 0;
         this.mutationRate = 0;
         this.crossoverRate = 0;
         this.elitismCount = 0;
+
+        // DO NOT PUT DYNAMIC VARIABLES HERE (e.g: item collections, bin capacity, etc.)
         // ...
     }
 

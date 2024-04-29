@@ -21,7 +21,6 @@ public class GeneticAlgorithm implements Algorithm {
         this.mutationRate = 0.01;
         this.crossoverRate = 0.8;
         this.elitismCount = 3;
-        items = new ArrayList<Integer>();
     }
 
     @Override
