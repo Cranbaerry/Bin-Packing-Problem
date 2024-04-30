@@ -3,40 +3,26 @@ import factories.ItemFactory;
 import objects.Problem;
 import objects.Result;
 import objects.Solution;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYAreaRenderer;
-import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.xy.DefaultXYDataset;
-import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.ui.ApplicationFrame;
 
-import java.awt.*;
-import java.awt.geom.Ellipse2D;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
 
 public class Main {
-    public static final String PROBLEM_FILEPATH = "BPP.txt";
-    public static final String RESULTS_FILEPATH = "results/results.csv";
-    public static final int TEST_RUNS = 1;
+    private static final String PROBLEM_FILEPATH = "BPP.txt";
+    private static final String RESULTS_FOLDER = "results/";
+    private static final int TEST_RUNS = 30;
 
     public static void main(String[] args) throws CloneNotSupportedException, IOException {
         List<Problem> problems = readBinPackingProblems(PROBLEM_FILEPATH);
         Map<String, Algorithm> algorithms = new HashMap<>();
         Map<String, Map<String, List<Result>>> results = new HashMap<>(); // Stores averages for each problem-algorithm pair
-        algorithms.put("Genetic Algorithm", new GeneticAlgorithm());
-        algorithms.put("Firefly Algorithm", new FireFlyAlgorithm());
-        algorithms.put("Tabu Search Algorithm", new TabuSearchAlgorithm());
-        algorithms.put("Modified First Fit Descending", new ModifiedFirstFitDecreasingAlgorithm());
+        algorithms.put("GA", new GeneticAlgorithm());
+        algorithms.put("FA", new FireFlyAlgorithm());
+        algorithms.put("TS", new TabuSearchAlgorithm());
+        algorithms.put("MFF", new ModifiedFirstFitDecreasingAlgorithm());
         // TODO: Add other algorithms here
 
         System.out.println("Bin Packing Problem Solver");
@@ -68,7 +54,6 @@ public class Main {
                     Result result = solution.evaluateResult(problem.getName(), algorithmName);
                     //result.printOut();
                     //result.printIterationData();
-                    //result.plotGraph(bins);
 
                     // Add the result to the list for averaging later
                     results.get(problem.getName()).get(algorithmName).add(result);
@@ -78,10 +63,9 @@ public class Main {
             //break;
         }
 
-        generateBarChart("Bin Packing Problem Results", "Problem", "Average Number of Bins", results);
-        //generateConvergenceChart("Convergence Chart", "Iteration", "Number of Bins", results);
-        printAveragesToCSV(results);
-        generateConvChart(results);
+        printAveragesToCSV(results); // for avg. number of bins and run time bar chart
+        printDetailedIterationDataToCSV(results); // for convergence graph
+        printRuntimeDataToCSV(results); // for runtime box plot
 
         double totalRunTime = results.values().stream()
                 .flatMap(m -> m.values().stream())
@@ -89,7 +73,7 @@ public class Main {
                 .mapToLong(Result::getRuntime)
                 .sum();
         System.out.printf("Total execution time: %.3fms%n", totalRunTime);
-        System.out.println("Results saved to " + RESULTS_FILEPATH);
+        System.out.println("Results saved to folder: " + RESULTS_FOLDER);
     }
 
     public static List<Problem> readBinPackingProblems(String filename) {
@@ -136,10 +120,11 @@ public class Main {
     }
 
     public static void printAveragesToCSV(Map<String, Map<String, List<Result>>> results) throws IOException {
-        FileWriter csvWriter = new FileWriter(RESULTS_FILEPATH);
+        FileWriter csvWriter = new FileWriter(RESULTS_FOLDER + "summary.csv");
         String header = String.format("Problem,Algorithm,Avg. Number of Bins,Avg. Bin Fullness, Avg. Fairness of Packing, Avg. Execution Time (ms),Total Execution Time (ms)%n");
         csvWriter.write(header);
 
+        String previousProblemName = "";
         for (Map.Entry<String, Map<String, List<Result>>> problemResults : results.entrySet()) {
             String problemName = problemResults.getKey();
             for (Map.Entry<String, List<Result>> algorithmResults : problemResults.getValue().entrySet()) {
@@ -151,6 +136,11 @@ public class Main {
                 double averageFairnessOfPacking = resultsList.stream().mapToDouble(Result::getFairnessOfPacking).average().orElse(0.0);
                 double averageRunTime = resultsList.stream().mapToDouble(Result::getRuntime).average().orElse(0.0);
                 double totalRunTime = resultsList.stream().mapToLong(Result::getRuntime).sum();
+                if (previousProblemName.equals(problemName)) {
+                    problemName = "";
+                } else {
+                    previousProblemName = problemResults.getKey();
+                }
 
                 String output = String.format("%s,%s,%.3f,%.3f,%.3f,%.3f,%.3f%n",
                         problemName, algorithmName, averageNumberOfBins, averageBinFullness, averageFairnessOfPacking, averageRunTime, totalRunTime);
@@ -162,127 +152,159 @@ public class Main {
         csvWriter.close();
     }
 
-    public static void generateBarChart(String title, String xLabel, String yLabel, Map<String, Map<String, List<Result>>> results) {
-        Map<String, Map<String, Double>> averageData = new HashMap<>();
+    private static void printDetailedIterationDataToCSV(Map<String, Map<String, List<Result>>> results) throws IOException {
+        FileWriter csvWriter = new FileWriter(RESULTS_FOLDER + "iterations.csv");
 
-        for (Map.Entry<String, Map<String, List<Result>>> problemResults : results.entrySet()) {
-            String problemName = problemResults.getKey();
-            Map<String, List<Result>> algorithmResults = problemResults.getValue();
-
-            Map<String, Double> avgAlgorithmData = new HashMap<>();
-
-            for (Map.Entry<String, List<Result>> algorithmResult : algorithmResults.entrySet()) {
-                String algorithmName = algorithmResult.getKey();
-                List<Result> resultsList = algorithmResult.getValue();
-
-                double averageNumberOfBins = resultsList.stream().mapToDouble(Result::getNumberOfBins).average().orElse(0.0);
-                double averageBinFullness = resultsList.stream().mapToDouble(Result::getBinFullness).average().orElse(0.0);
-                double averageFairnessOfPacking = resultsList.stream().mapToDouble(Result::getFairnessOfPacking).average().orElse(0.0);
-                double averageRunTime = resultsList.stream().mapToDouble(Result::getRuntime).average().orElse(0.0);
-
-                avgAlgorithmData.put(algorithmName, averageNumberOfBins);
-            }
-
-            averageData.put(problemName, avgAlgorithmData);
-        }
-
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        for (Map.Entry<String, Map<String, Double>> entry : averageData.entrySet()) {
-            String problemName = entry.getKey();
-            Map<String, Double> algorithmData = entry.getValue();
-
-            for (Map.Entry<String, Double> algorithmEntry : algorithmData.entrySet()) {
-                String algorithmName = algorithmEntry.getKey();
-                Double value = algorithmEntry.getValue();
-
-                dataset.addValue(value, algorithmName, problemName);
+        // Find the problem with the highest number of items
+        String selectedProblem = null;
+        int maxItems = Integer.MIN_VALUE;
+        for (Map.Entry<String, Map<String, List<Result>>> entry : results.entrySet()) {
+            int totalItems = entry.getValue().values().stream()
+                    .flatMap(List::stream)
+                    .mapToInt(Result::getNumberOfItems)
+                    .sum();
+            if (totalItems > maxItems) {
+                maxItems = totalItems;
+                selectedProblem = entry.getKey();
             }
         }
 
-        JFreeChart chart = ChartFactory.createBarChart(title, xLabel, yLabel, dataset);
-        ApplicationFrame frame = new ApplicationFrame(title);
-        frame.setContentPane(new ChartPanel(chart));
-        frame.pack();
-        frame.setVisible(true);
-    }
-
-    public static void generateLineChart(String title, String xLabel, String yLabel, Map<String, Map<String, List<Double>>> data, int iterations) {
-        XYDataset dataset = createDataset(data, iterations);
-        JFreeChart chart = ChartFactory.createXYLineChart(title, xLabel, yLabel, dataset);
-
-        ApplicationFrame frame = new ApplicationFrame(title);
-        frame.setContentPane(new ChartPanel(chart));
-        frame.pack();
-        frame.setVisible(true);
-    }
-
-    private static XYDataset createDataset(Map<String, Map<String, List<Double>>> data, int iterations) {
-        DefaultXYDataset dataset = new DefaultXYDataset();
-
-        for (Map.Entry<String, Map<String, List<Double>>> problemData : data.entrySet()) {
-            String problemName = problemData.getKey();
-            Map<String, List<Double>> algorithmData = problemData.getValue();
-
-            for (Map.Entry<String, List<Double>> algorithmEntry : algorithmData.entrySet()) {
-                String algorithmName = algorithmEntry.getKey();
-                List<Double> values = algorithmEntry.getValue();
-
-                double[] seriesData = new double[iterations * 2];
-
-                for (int i = 0; i < iterations; i++) {
-                    seriesData[i * 2] = i;
-                    seriesData[i * 2 + 1] = values.get(i);
-                }
-
-                dataset.addSeries(algorithmName + " (" + problemName + ")", new double[][]{seriesData});
-            }
+        if (selectedProblem == null) {
+            // No problem found, exit
+            return;
         }
 
-        return dataset;
-    }
+        // Print problem name
+        System.out.println("Selected problem: " + selectedProblem + " with " + maxItems + " items");
+        // Collect unique algorithms
+        Set<String> algorithms = new HashSet<>();
+        algorithms.addAll(results.get(selectedProblem).keySet());
 
-    private static void generateConvChart(Map<String, Map<String, List<Result>>> results) {
-        for (Map.Entry<String, Map<String, List<Result>>> problemResults : results.entrySet()) {
-            String problemName = problemResults.getKey();
-            Map<String, List<Result>> algorithmResults = problemResults.getValue();
-            XYSeriesCollection dataset = new XYSeriesCollection();
-            for (Map.Entry<String, List<Result>> algorithmResult : algorithmResults.entrySet()) {
-                String algorithmName = algorithmResult.getKey();
-                List<Result> resultsList = algorithmResult.getValue();
-                XYSeries series = new XYSeries(algorithmName);
-                // Pick one result from results list with the least number of bins
-                Result result = resultsList.stream().min((r1, r2) -> Integer.compare(r1.getNumberOfBins(), r2.getNumberOfBins())).orElse(null);
-                if (result == null) { continue; }
+        // Write header
+        StringBuilder header = new StringBuilder("Iteration");
+        for (String algorithm : algorithms) {
+            header.append(",").append(algorithm);
+        }
+        header.append("\n");
+        csvWriter.write(header.toString());
+
+        // Collect iteration data for selected problem and each algorithm
+        Map<Integer, Map<String, Integer>> iterationDataMap = new HashMap<>();
+        Map<String, List<Result>> selectedProblemResults = results.get(selectedProblem);
+        for (Map.Entry<String, List<Result>> algorithmResults : selectedProblemResults.entrySet()) {
+            String algorithmName = algorithmResults.getKey();
+            List<Result> resultsList = algorithmResults.getValue();
+            for (Result result : resultsList) {
                 HashMap<Integer, Integer> iterationData = result.getIterationData();
                 for (Map.Entry<Integer, Integer> entry : iterationData.entrySet()) {
-                    series.add(entry.getKey(), entry.getValue());
+                    int iteration = entry.getKey();
+                    int numberOfBins = entry.getValue();
+                    iterationDataMap.computeIfAbsent(iteration, k -> new HashMap<>())
+                            .put(algorithmName, numberOfBins);
                 }
-                dataset.addSeries(series);
+            }
+        }
+
+        // Write iteration data to CSV
+        for (Map.Entry<Integer, Map<String, Integer>> entry : iterationDataMap.entrySet()) {
+            int iteration = entry.getKey();
+            Map<String, Integer> algorithmData = entry.getValue();
+            StringBuilder output = new StringBuilder(iteration + "");
+            for (String algorithm : algorithms) {
+                output.append(",").append(algorithmData.getOrDefault(algorithm, 0));
+            }
+            output.append("\n");
+            csvWriter.write(output.toString());
+        }
+
+        csvWriter.flush();
+        csvWriter.close();
+    }
+
+
+//    private static void printDetailedIterationDataToCSV(Map<String, Map<String, List<Result>>> results) throws IOException {
+//        FileWriter csvWriter = new FileWriter(RESULTS_FOLDER + "iterations.csv");
+//        String header = String.format("Problem,Algorithm,Iteration,Number of Bins%n");
+//        csvWriter.write(header);
+//
+//        for (Map.Entry<String, Map<String, List<Result>>> problemResults : results.entrySet()) {
+//            String problemName = problemResults.getKey();
+//            for (Map.Entry<String, List<Result>> algorithmResults : problemResults.getValue().entrySet()) {
+//                String algorithmName = algorithmResults.getKey();
+//                List<Result> resultsList = algorithmResults.getValue();
+//                for (Result result : resultsList) {
+//                    HashMap<Integer, Integer> iterationData = result.getIterationData();
+//                    for (Map.Entry<Integer, Integer> entry : iterationData.entrySet()) {
+//                        String output = String.format("%s,%s,%d,%d%n",
+//                                problemName, algorithmName, entry.getKey(), entry.getValue());
+//                        csvWriter.write(output);
+//                    }
+//                }
+//            }
+//        }
+//
+//        csvWriter.flush();
+//        csvWriter.close();
+//    }
+//    private static void printDetailedIterationDataToCSV(Map<String, Map<String, List<Result>>> results) throws IOException {
+//        FileWriter csvWriter = new FileWriter(RESULTS_FOLDER + "iterations.csv");
+//        String header = String.format("Problem,Algorithm,Iteration,Number of Bins%n");
+//        csvWriter.write(header);
+//
+//        String previousProblemName = "";
+//        for (Map.Entry<String, Map<String, List<Result>>> problemResults : results.entrySet()) {
+//            String problemName = problemResults.getKey();
+//            for (Map.Entry<String, List<Result>> algorithmResults : problemResults.getValue().entrySet()) {
+//                String algorithmName = algorithmResults.getKey();
+//                List<Result> resultsList = algorithmResults.getValue();
+//                for (Result result : resultsList) {
+//                    HashMap<Integer, Integer> iterationData = result.getIterationData();
+//                    for (Map.Entry<Integer, Integer> entry : iterationData.entrySet()) {
+//                        if (previousProblemName.equals(problemName)) {
+//                            problemName = "";
+//                        } else {
+//                            previousProblemName = problemName;
+//                        }
+//                        String output = String.format("%s,%s,%d,%d%n",
+//                                problemName, algorithmName, entry.getKey(), entry.getValue());
+//                        csvWriter.write(output);
+//                    }
+//                }
+//            }
+//        }
+//
+//        csvWriter.flush();
+//        csvWriter.close();
+//    }
+
+    private static void printRuntimeDataToCSV(Map<String, Map<String, List<Result>>> results) {
+        try {
+            FileWriter csvWriter = new FileWriter(RESULTS_FOLDER + "runtimes.csv");
+            String header = String.format("Problem,Algorithm,Runtime (ms)%n");
+            csvWriter.write(header);
+
+            String previousProblemName = "";
+            for (Map.Entry<String, Map<String, List<Result>>> problemResults : results.entrySet()) {
+                String problemName = problemResults.getKey();
+                for (Map.Entry<String, List<Result>> algorithmResults : problemResults.getValue().entrySet()) {
+                    String algorithmName = algorithmResults.getKey();
+                    List<Result> resultsList = algorithmResults.getValue();
+                    for (Result result : resultsList) {
+                        if (previousProblemName.equals(problemName)) {
+                            problemName = "";
+                        } else {
+                            previousProblemName = problemName;
+                        }
+                        String output = String.format("%s,%s,%d%n", problemName, algorithmName, result.getRuntime());
+                        csvWriter.write(output);
+                    }
+                }
             }
 
-            // Create the chart
-            JFreeChart chart = ChartFactory.createXYLineChart(
-                    "Convergence Chart for " + problemName,
-                    "Iteration",
-                    "Value",
-                    dataset,
-                    PlotOrientation.VERTICAL,
-                    true,   // include legend
-                    true,
-                    false);
-            XYPlot plot = chart.getXYPlot();
-
-            plot.setBackgroundPaint(Color.lightGray);
-            plot.setForegroundAlpha(0.35f);
-            plot.setDomainGridlinePaint(Color.white);
-            plot.setRangeGridlinePaint(Color.white);
-
-            XYAreaRenderer renderer = new XYAreaRenderer(XYAreaRenderer.AREA);
-            plot.setRenderer(renderer);
-            ApplicationFrame frame = new ApplicationFrame("Convergence Chart");
-            frame.setContentPane(new ChartPanel(chart));
-            frame.pack();
-            frame.setVisible(true);
+            csvWriter.flush();
+            csvWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

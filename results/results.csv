@@ -1,6 +1,0 @@
-Problem,Algorithm,Avg. Number of Bins,Avg. Bin Fullness, Avg. Fairness of Packing, Avg. Execution Time (ms),Total Execution Time (ms)
-TEST0082,Genetic Algorithm,32.000,74.907,0.156,130.000,130.000
-TEST0030,Genetic Algorithm,33.000,81.808,0.134,123.000,123.000
-TEST0044,Genetic Algorithm,16.000,87.493,0.196,87.000,87.000
-TEST0014,Genetic Algorithm,29.000,79.300,0.140,74.000,74.000
-TEST0049,Genetic Algorithm,12.000,91.617,0.075,171.000,171.000

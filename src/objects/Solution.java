@@ -65,12 +65,12 @@ public class Solution implements Cloneable {
         return this.bins.getTotalWeight() / this.bins.getNumberOfBins();
     }
 
-    public void setIterationData(HashMap<Integer, Integer> iterationData) {
-        this.iterationData = iterationData;
-    }
-
     public HashMap<Integer, Integer> getIterationData() {
         return this.iterationData;
+    }
+
+    public void setIterationData(HashMap<Integer, Integer> iterationData) {
+        this.iterationData = iterationData;
     }
 }
 
