@@ -59,7 +59,6 @@ public class SampleAlgorithm implements Algorithm {
         }
 
 
-
         return solution.finalizeResult(iterationData); // This should be at the bottom, it finalizes the result and calculates the runtime
     }
 }

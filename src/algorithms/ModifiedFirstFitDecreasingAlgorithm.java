@@ -14,7 +14,8 @@ public class ModifiedFirstFitDecreasingAlgorithm implements Algorithm {
     private List<Integer> tinyItems;
     private int binCapacity;
 
-    public ModifiedFirstFitDecreasingAlgorithm() { }
+    public ModifiedFirstFitDecreasingAlgorithm() {
+    }
 
     @Override
     public Solution solve(Problem problem) {

@@ -68,7 +68,6 @@ public class TabuSearchAlgorithm implements Algorithm {
                 currentIteration++; // Increment iteration count
                 iterationData.put(currentIteration, currentSolution.bins.getNumberOfBins());
             } while (unchangedIterations < convergenceIterations);
-
             currentSolution.setStartTime(startTime);
             return currentSolution.finalizeResult(iterationData);
         } catch (CloneNotSupportedException e) {
