@@ -34,9 +34,9 @@ public class Main {
         Map<String, Algorithm> algorithms = new HashMap<>();
         Map<String, Map<String, List<Result>>> results = new HashMap<>(); // Stores averages for each problem-algorithm pair
         algorithms.put("Genetic Algorithm", new GeneticAlgorithm());
-//        algorithms.put("Firefly Algorithm", new FireFlyAlgorithm());
-//        algorithms.put("Tabu Search Algorithm", new TabuSearchAlgorithm());
-//        algorithms.put("Modified First Fit Descending", new ModifiedFirstFitDecreasingAlgorithm());
+        algorithms.put("Firefly Algorithm", new FireFlyAlgorithm());
+        algorithms.put("Tabu Search Algorithm", new TabuSearchAlgorithm());
+        algorithms.put("Modified First Fit Descending", new ModifiedFirstFitDecreasingAlgorithm());
         // TODO: Add other algorithms here
 
         System.out.println("Bin Packing Problem Solver");
@@ -270,21 +270,15 @@ public class Main {
                     true,   // include legend
                     true,
                     false);
-
-            // Get the plot from the chart
             XYPlot plot = chart.getXYPlot();
+
             plot.setBackgroundPaint(Color.lightGray);
             plot.setForegroundAlpha(0.35f);
             plot.setDomainGridlinePaint(Color.white);
             plot.setRangeGridlinePaint(Color.white);
 
-            // Use the XYAreaRenderer to fill the area beneath the line.
             XYAreaRenderer renderer = new XYAreaRenderer(XYAreaRenderer.AREA);
-
-
-            // Apply the renderer to the plot
             plot.setRenderer(renderer);
-            // Display the chart
             ApplicationFrame frame = new ApplicationFrame("Convergence Chart");
             frame.setContentPane(new ChartPanel(chart));
             frame.pack();
