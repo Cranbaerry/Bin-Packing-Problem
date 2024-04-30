@@ -28,16 +28,16 @@ public class GeneticAlgorithm implements Algorithm {
         Solution solution = new Solution(problem); // This should be at the top, it initializes the runtime timer
         this.binCapacity = problem.getCapacity();
         this.items = problem.items.flatten();
-        int chromosomeLength = items.size();
 
         // Initialize population
         List<Chromosome> population = new ArrayList<>();
         for (int i = 0; i < populationSize; i++) {
-            population.add(new Chromosome(createIndividual(items, chromosomeLength), binCapacity));
+            population.add(new Chromosome(createIndividual(items), binCapacity));
         }
 
         int generation = 0;
         int counter = 0;
+        HashMap<Integer, Integer> iterationData = new HashMap<>();
         Chromosome fittestChromosome = Collections.min(population, Comparator.comparing(Chromosome::getFitness));
         while (counter < 30) {
             // Evolve population
@@ -51,10 +51,12 @@ public class GeneticAlgorithm implements Algorithm {
                 fittestChromosome = temp;
                 counter = 0;
             }
+            iterationData.put(generation, fittestChromosome.getFitness());
         }
         // System.out.println("Generation : " + generation);
         // Convert solution to list of bins
         fittestChromosome = Collections.min(population, Comparator.comparing(Chromosome::getFitness));
+        Collections.shuffle(fittestChromosome.getGenes());
         int currentBinCapacity = 0;
         ItemFactory items = new ItemFactory();
         for (int gene : fittestChromosome.getGenes()) {
@@ -68,11 +70,10 @@ public class GeneticAlgorithm implements Algorithm {
         }
 
         solution.bins.createBin(items); //add final bin to list of bins
-
-        return solution.finalizeResult(); // This should be at the bottom, it finalizes the result and calculates the runtime
+        return solution.finalizeResult(iterationData); // This should be at the bottom, it finalizes the result and calculates the runtime
     }
 
-    private List<Integer> createIndividual(List<Integer> items, int chromosomeLength) {
+    private List<Integer> createIndividual(List<Integer> items) {
         List<Integer> individual = new ArrayList<>(items);
         Collections.shuffle(individual);
         return individual;

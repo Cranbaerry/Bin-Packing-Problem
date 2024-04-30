@@ -144,6 +144,14 @@ public class ModifiedFirstFitDecreasingAlgorithm implements Algorithm {
             solution.bins.createBin(bin);
         }
 
-        return solution.finalizeResult();
+        // Since first fit is technically run once
+        // We can just add the number of bins to the iteration data 30 times
+        // This is a hacky way to make the graph look nice
+        HashMap<Integer, Integer> iterationData = new HashMap<>();
+        for (int i = 1; i <= 30; i++) {
+            iterationData.put(i, solution.bins.getNumberOfBins());
+        }
+
+        return solution.finalizeResult(iterationData);
     }
 }

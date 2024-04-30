@@ -36,6 +36,7 @@ public class FireFlyAlgorithm implements Algorithm {
 
         int iteration = 0;
         int counter = 0;
+        HashMap<Integer, Integer> iterationData = new HashMap<>();
         Firefly fittestFirefly = Collections.min(population, Comparator.comparing(Firefly::getFitness));
         while (counter < 30) {
             Collections.sort(population, (c1, c2) -> Integer.compare(c1.getFitness(), c2.getFitness()));
@@ -50,8 +51,8 @@ public class FireFlyAlgorithm implements Algorithm {
                 fittestFirefly = temp;
                 counter = 0;
             }
+            iterationData.put(iteration, fittestFirefly.getFitness());
         }
-        // System.out.println("Iteration : " + iteration);
 
         fittestFirefly = Collections.min(population, Comparator.comparing(Firefly::getFitness));
         int currentBinCapacity = 0;
@@ -67,7 +68,7 @@ public class FireFlyAlgorithm implements Algorithm {
         }
 
 
-        return solution.finalizeResult();
+        return solution.finalizeResult(iterationData);
     }
 
     private List<Integer> createFireFlies(List<Integer> items, int Particle_Position) {
@@ -137,9 +138,6 @@ class Firefly {
                 currentBinCapacity = 0;
             }
             currentBinCapacity += item;
-        }
-        if (currentBinCapacity > 0) {
-            fitness++;
         }
     }
 }

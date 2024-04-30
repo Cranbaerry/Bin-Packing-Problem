@@ -13,6 +13,7 @@ import objects.Problem;
 import objects.Solution;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -43,10 +44,12 @@ public class TabuSearchAlgorithm implements Algorithm {
 
         // Generate initial solution using first fit algorithm
         Solution currentSolution = firstFitSolution(this.items, problem);
-        // Solution currentSolution = randomizeSolution(this.items, problem);
+        //Solution currentSolution = randomizeSolution(this.items, problem);
         int unchangedIterations = 0;
         try {
             Solution bestSolution = (Solution) currentSolution.clone();
+            //hasmap to store the number of bins for each iteration
+            HashMap<Integer, Integer> iterationData = new HashMap<>();
             do {
                 List<Solution> neighbors = generateNeighbors(currentSolution, problem); // Generate neighbors
                 Solution bestNeighbor = getBestNeighbor(neighbors); // Find the best improving neighbor
@@ -61,12 +64,13 @@ public class TabuSearchAlgorithm implements Algorithm {
                 }
 
                 updateTabuList(bestSolution); // Update tabu attributes based on best solution
-                currentSolution = (Solution) bestNeighbor.clone(); // Move to the best neighbor
+                currentSolution = (Solution) bestSolution.clone(); // Move to the best neighbor
                 currentIteration++; // Increment iteration count
+                iterationData.put(currentIteration, currentSolution.bins.getNumberOfBins());
             } while (unchangedIterations < convergenceIterations);
 
             currentSolution.setStartTime(startTime);
-            return currentSolution.finalizeResult();
+            return currentSolution.finalizeResult(iterationData);
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }

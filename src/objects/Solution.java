@@ -2,23 +2,29 @@ package objects;
 
 import factories.BinFactory;
 
+import java.util.HashMap;
+
 public class Solution implements Cloneable {
     private final Problem problem;
     public BinFactory bins;
     private long startTime, endTime;
+    private HashMap<Integer, Integer> iterationData; // Iteration number, number of bins
+
 
     public Solution(Problem problem) {
         this.startTime = System.currentTimeMillis();
         this.problem = problem;
         this.bins = new BinFactory(problem.getCapacity());
+        this.iterationData = new HashMap<>();
     }
 
     public void setStartTime(long startTime) {
         this.startTime = startTime;
     }
 
-    public Solution finalizeResult() {
+    public Solution finalizeResult(HashMap<Integer, Integer> iterationData) {
         this.endTime = System.currentTimeMillis() - this.startTime;
+        this.iterationData = iterationData;
         return this;
     }
 
@@ -33,6 +39,7 @@ public class Solution implements Cloneable {
         result.setBinFullness(this.bins.getBinFullness());
         result.setFairnessOfPacking(this.bins.getBinFullnessStdDev());
         result.setFitness(this.getFitness());
+        result.setIterationData(this.iterationData);
 
         return result;
     }
@@ -56,6 +63,14 @@ public class Solution implements Cloneable {
     public double getFitness() {
         // return this.bins.getBinFullness();
         return this.bins.getTotalWeight() / this.bins.getNumberOfBins();
+    }
+
+    public void setIterationData(HashMap<Integer, Integer> iterationData) {
+        this.iterationData = iterationData;
+    }
+
+    public HashMap<Integer, Integer> getIterationData() {
+        return this.iterationData;
     }
 }
 

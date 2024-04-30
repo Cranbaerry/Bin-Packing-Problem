@@ -3,7 +3,21 @@ import factories.ItemFactory;
 import objects.Problem;
 import objects.Result;
 import objects.Solution;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYAreaRenderer;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.ui.ApplicationFrame;
 
+import java.awt.*;
+import java.awt.geom.Ellipse2D;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,24 +27,20 @@ import java.util.Map;
 public class Main {
     public static final String PROBLEM_FILEPATH = "BPP.txt";
     public static final String RESULTS_FILEPATH = "results/results.csv";
+    public static final int TEST_RUNS = 1;
 
-    public static void main(String[] args) throws CloneNotSupportedException {
+    public static void main(String[] args) throws CloneNotSupportedException, IOException {
         List<Problem> problems = readBinPackingProblems(PROBLEM_FILEPATH);
-        List<Result> results = new ArrayList<>();
         Map<String, Algorithm> algorithms = new HashMap<>();
-        //algorithms.put("Genetic Algorithm", new GeneticAlgorithm());
-        //algorithms.put("Firefly Algorithm", new FireFlyAlgorithm());
-        //algorithms.put("Tabu Search Algorithm", new TabuSearchAlgorithm());
-        algorithms.put("Modified First Fit Descending", new ModifiedFirstFitDecreasingAlgorithm());
-        // algorithms.put("Simulated Annealing Algorithm", new SimulatedAnnealingAlgorithm());
+        Map<String, Map<String, List<Result>>> results = new HashMap<>(); // Stores averages for each problem-algorithm pair
+        algorithms.put("Genetic Algorithm", new GeneticAlgorithm());
+//        algorithms.put("Firefly Algorithm", new FireFlyAlgorithm());
+//        algorithms.put("Tabu Search Algorithm", new TabuSearchAlgorithm());
+//        algorithms.put("Modified First Fit Descending", new ModifiedFirstFitDecreasingAlgorithm());
         // TODO: Add other algorithms here
 
         System.out.println("Bin Packing Problem Solver");
         System.out.printf("Found %d problems in %s%n", problems.size(), PROBLEM_FILEPATH);
-//        for (Problem problem : problems) {
-//            System.out.printf("- %s with %d items & bin capacity of %d%n",
-//                    problem.getName(), problem.getNumberOfItems(), problem.getCapacity());
-//        }
         System.out.printf("Using %d algorithm(s):%n", algorithms.size());
 
         int index = 1;
@@ -45,20 +55,40 @@ public class Main {
                 String algorithmName = entry.getKey();
                 Algorithm algorithm = entry.getValue();
 
-                Solution solution = algorithm.solve(problem);
-                ArrayList<ItemFactory> bins = solution.bins.getBins();
-                Result result = solution.evaluateResult(problem.getName(), algorithmName);
-                result.printOut();
-                result.plotGraph(bins);
-                results.add(result);
+                if (!results.containsKey(problem.getName())) {
+                    results.put(problem.getName(), new HashMap<>());
+                }
+                if (!results.get(problem.getName()).containsKey(algorithmName)) {
+                    results.get(problem.getName()).put(algorithmName, new ArrayList<>());
+                }
+
+                for (int i = 0; i < TEST_RUNS; i++) {
+                    Solution solution = algorithm.solve(problem);
+                    ArrayList<ItemFactory> bins = solution.bins.getBins();
+                    Result result = solution.evaluateResult(problem.getName(), algorithmName);
+                    //result.printOut();
+                    //result.printIterationData();
+                    //result.plotGraph(bins);
+
+                    // Add the result to the list for averaging later
+                    results.get(problem.getName()).get(algorithmName).add(result);
+                }
             }
+            // TODO: remove this break statement to run all problems
+            //break;
         }
 
-        // Save results to CSV file
-        saveResults(results, RESULTS_FILEPATH);
+        generateBarChart("Bin Packing Problem Results", "Problem", "Average Number of Bins", results);
+        //generateConvergenceChart("Convergence Chart", "Iteration", "Number of Bins", results);
+        printAveragesToCSV(results);
+        generateConvChart(results);
 
-        long totalRuntime = results.stream().mapToLong(Result::getRuntime).sum();
-        System.out.printf("All problems solved in %dms%n", totalRuntime);
+        double totalRunTime = results.values().stream()
+                .flatMap(m -> m.values().stream())
+                .flatMap(List::stream)
+                .mapToLong(Result::getRuntime)
+                .sum();
+        System.out.printf("Total execution time: %.3fms%n", totalRunTime);
         System.out.println("Results saved to " + RESULTS_FILEPATH);
     }
 
@@ -79,8 +109,6 @@ public class Main {
                     name = name.substring(0, name.length() - 1); // Remove the last '
                     problem.setName(name);
                 } else {
-                    // Reading problem d
-                    // ata
                     if (problem != null) {
                         if (problem.getNumberOfData() == 0) {
                             problem.setNumberOfData(Integer.parseInt(line.trim()));
@@ -107,28 +135,160 @@ public class Main {
         return problems;
     }
 
-    public static void saveResults(List<Result> results, String csvFile) {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(csvFile))) {
-            bw.write("Problem Name, Number of Items, Bin Capacity, Algorithm,Execution Time (ms),Number Of Bins,Bin Fullness (%),Fairness Of Packing");
-            bw.newLine();
+    public static void printAveragesToCSV(Map<String, Map<String, List<Result>>> results) throws IOException {
+        FileWriter csvWriter = new FileWriter(RESULTS_FILEPATH);
+        String header = String.format("Problem,Algorithm,Avg. Number of Bins,Avg. Bin Fullness, Avg. Fairness of Packing, Avg. Execution Time (ms),Total Execution Time (ms)%n");
+        csvWriter.write(header);
 
-            for (Result result : results) {
-                String csvLine = String.format(
-                        "\"%s\",%d, %d, %s,%d,%d,%.3f,%.3f",
-                        result.getProblemName().replaceAll("\"", "\"\""),
-                        result.getNumberOfItems(),
-                        result.getBinCapacity(),
-                        result.getAlgorithmName(),
-                        result.getRuntime(),
-                        result.getNumberOfBins(),
-                        result.getBinFullness(),
-                        result.getFairnessOfPacking()
-                );
-                bw.write(csvLine);
-                bw.newLine();
+        for (Map.Entry<String, Map<String, List<Result>>> problemResults : results.entrySet()) {
+            String problemName = problemResults.getKey();
+            for (Map.Entry<String, List<Result>> algorithmResults : problemResults.getValue().entrySet()) {
+                String algorithmName = algorithmResults.getKey();
+                List<Result> resultsList = algorithmResults.getValue();
+
+                double averageNumberOfBins = resultsList.stream().mapToDouble(Result::getNumberOfBins).average().orElse(0.0);
+                double averageBinFullness = resultsList.stream().mapToDouble(Result::getBinFullness).average().orElse(0.0);
+                double averageFairnessOfPacking = resultsList.stream().mapToDouble(Result::getFairnessOfPacking).average().orElse(0.0);
+                double averageRunTime = resultsList.stream().mapToDouble(Result::getRuntime).average().orElse(0.0);
+                double totalRunTime = resultsList.stream().mapToLong(Result::getRuntime).sum();
+
+                String output = String.format("%s,%s,%.3f,%.3f,%.3f,%.3f,%.3f%n",
+                        problemName, algorithmName, averageNumberOfBins, averageBinFullness, averageFairnessOfPacking, averageRunTime, totalRunTime);
+                csvWriter.write(output);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+
+        csvWriter.flush();
+        csvWriter.close();
+    }
+
+    public static void generateBarChart(String title, String xLabel, String yLabel, Map<String, Map<String, List<Result>>> results) {
+        Map<String, Map<String, Double>> averageData = new HashMap<>();
+
+        for (Map.Entry<String, Map<String, List<Result>>> problemResults : results.entrySet()) {
+            String problemName = problemResults.getKey();
+            Map<String, List<Result>> algorithmResults = problemResults.getValue();
+
+            Map<String, Double> avgAlgorithmData = new HashMap<>();
+
+            for (Map.Entry<String, List<Result>> algorithmResult : algorithmResults.entrySet()) {
+                String algorithmName = algorithmResult.getKey();
+                List<Result> resultsList = algorithmResult.getValue();
+
+                double averageNumberOfBins = resultsList.stream().mapToDouble(Result::getNumberOfBins).average().orElse(0.0);
+                double averageBinFullness = resultsList.stream().mapToDouble(Result::getBinFullness).average().orElse(0.0);
+                double averageFairnessOfPacking = resultsList.stream().mapToDouble(Result::getFairnessOfPacking).average().orElse(0.0);
+                double averageRunTime = resultsList.stream().mapToDouble(Result::getRuntime).average().orElse(0.0);
+
+                avgAlgorithmData.put(algorithmName, averageNumberOfBins);
+            }
+
+            averageData.put(problemName, avgAlgorithmData);
+        }
+
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        for (Map.Entry<String, Map<String, Double>> entry : averageData.entrySet()) {
+            String problemName = entry.getKey();
+            Map<String, Double> algorithmData = entry.getValue();
+
+            for (Map.Entry<String, Double> algorithmEntry : algorithmData.entrySet()) {
+                String algorithmName = algorithmEntry.getKey();
+                Double value = algorithmEntry.getValue();
+
+                dataset.addValue(value, algorithmName, problemName);
+            }
+        }
+
+        JFreeChart chart = ChartFactory.createBarChart(title, xLabel, yLabel, dataset);
+        ApplicationFrame frame = new ApplicationFrame(title);
+        frame.setContentPane(new ChartPanel(chart));
+        frame.pack();
+        frame.setVisible(true);
+    }
+
+    public static void generateLineChart(String title, String xLabel, String yLabel, Map<String, Map<String, List<Double>>> data, int iterations) {
+        XYDataset dataset = createDataset(data, iterations);
+        JFreeChart chart = ChartFactory.createXYLineChart(title, xLabel, yLabel, dataset);
+
+        ApplicationFrame frame = new ApplicationFrame(title);
+        frame.setContentPane(new ChartPanel(chart));
+        frame.pack();
+        frame.setVisible(true);
+    }
+
+    private static XYDataset createDataset(Map<String, Map<String, List<Double>>> data, int iterations) {
+        DefaultXYDataset dataset = new DefaultXYDataset();
+
+        for (Map.Entry<String, Map<String, List<Double>>> problemData : data.entrySet()) {
+            String problemName = problemData.getKey();
+            Map<String, List<Double>> algorithmData = problemData.getValue();
+
+            for (Map.Entry<String, List<Double>> algorithmEntry : algorithmData.entrySet()) {
+                String algorithmName = algorithmEntry.getKey();
+                List<Double> values = algorithmEntry.getValue();
+
+                double[] seriesData = new double[iterations * 2];
+
+                for (int i = 0; i < iterations; i++) {
+                    seriesData[i * 2] = i;
+                    seriesData[i * 2 + 1] = values.get(i);
+                }
+
+                dataset.addSeries(algorithmName + " (" + problemName + ")", new double[][]{seriesData});
+            }
+        }
+
+        return dataset;
+    }
+
+    private static void generateConvChart(Map<String, Map<String, List<Result>>> results) {
+        for (Map.Entry<String, Map<String, List<Result>>> problemResults : results.entrySet()) {
+            String problemName = problemResults.getKey();
+            Map<String, List<Result>> algorithmResults = problemResults.getValue();
+            XYSeriesCollection dataset = new XYSeriesCollection();
+            for (Map.Entry<String, List<Result>> algorithmResult : algorithmResults.entrySet()) {
+                String algorithmName = algorithmResult.getKey();
+                List<Result> resultsList = algorithmResult.getValue();
+                XYSeries series = new XYSeries(algorithmName);
+                // Pick one result from results list with the least number of bins
+                Result result = resultsList.stream().min((r1, r2) -> Integer.compare(r1.getNumberOfBins(), r2.getNumberOfBins())).orElse(null);
+                if (result == null) { continue; }
+                HashMap<Integer, Integer> iterationData = result.getIterationData();
+                for (Map.Entry<Integer, Integer> entry : iterationData.entrySet()) {
+                    series.add(entry.getKey(), entry.getValue());
+                }
+                dataset.addSeries(series);
+            }
+
+            // Create the chart
+            JFreeChart chart = ChartFactory.createXYLineChart(
+                    "Convergence Chart for " + problemName,
+                    "Iteration",
+                    "Value",
+                    dataset,
+                    PlotOrientation.VERTICAL,
+                    true,   // include legend
+                    true,
+                    false);
+
+            // Get the plot from the chart
+            XYPlot plot = chart.getXYPlot();
+            plot.setBackgroundPaint(Color.lightGray);
+            plot.setForegroundAlpha(0.35f);
+            plot.setDomainGridlinePaint(Color.white);
+            plot.setRangeGridlinePaint(Color.white);
+
+            // Use the XYAreaRenderer to fill the area beneath the line.
+            XYAreaRenderer renderer = new XYAreaRenderer(XYAreaRenderer.AREA);
+
+
+            // Apply the renderer to the plot
+            plot.setRenderer(renderer);
+            // Display the chart
+            ApplicationFrame frame = new ApplicationFrame("Convergence Chart");
+            frame.setContentPane(new ChartPanel(chart));
+            frame.pack();
+            frame.setVisible(true);
         }
     }
 }

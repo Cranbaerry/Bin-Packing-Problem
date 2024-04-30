@@ -28,6 +28,8 @@ public class Result {
     private double fairnessOfPacking;
     private double solutionFitness;
 
+    private HashMap<Integer, Integer> iterationData;
+
     public Result() {
         this.algorithmName = "";
         this.numberOfBins = 0;
@@ -35,6 +37,7 @@ public class Result {
         this.binFullness = 0;
         this.fairnessOfPacking = 0;
         this.solutionFitness = 0;
+        this.iterationData = new HashMap<>();
     }
 
     public String getAlgorithmName() {
@@ -109,6 +112,21 @@ public class Result {
         this.fairnessOfPacking = fairnessOfPacking;
     }
 
+    public HashMap<Integer, Integer> getIterationData() {
+        return iterationData;
+    }
+
+    public void setIterationData(HashMap<Integer, Integer> iterationData) {
+        this.iterationData = iterationData;
+    }
+
+    public void printIterationData() {
+        System.out.println("Iteration Data:");
+        for (Map.Entry<Integer, Integer> entry : iterationData.entrySet()) {
+            System.out.printf("Iteration %d: %d bins%n", entry.getKey(), entry.getValue());
+        }
+        System.out.println();
+    }
     public void printOut() {
         System.out.printf("Results for %s using %s%n", problemName, algorithmName);
         System.out.printf("\uD83D\uDC49 Number of Bins: %d%n", numberOfBins);

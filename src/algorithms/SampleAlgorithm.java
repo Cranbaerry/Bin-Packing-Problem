@@ -26,6 +26,7 @@ public class SampleAlgorithm implements Algorithm {
     @Override
     public Solution solve(Problem problem) {
         Solution solution = new Solution(problem); // This should be at the top, it initializes the runtime timer
+        HashMap<Integer, Integer> iterationData = new HashMap<>(); // This is used to store the number of bins for each iteration
         while (solution.getCurrentRuntime() < 1000L) {
             // Implement the genetic algorithm here
             // ...
@@ -49,6 +50,7 @@ public class SampleAlgorithm implements Algorithm {
 
             // Create a bin with the set of items
             solution.bins.createBin(items);
+            iterationData.put(1, solution.bins.getNumberOfBins());
 
             // If you want to add more bins, create a new set of items and create a new bin
 
@@ -56,6 +58,8 @@ public class SampleAlgorithm implements Algorithm {
             break;
         }
 
-        return solution.finalizeResult(); // This should be at the bottom, it finalizes the result and calculates the runtime
+
+
+        return solution.finalizeResult(iterationData); // This should be at the bottom, it finalizes the result and calculates the runtime
     }
 }
