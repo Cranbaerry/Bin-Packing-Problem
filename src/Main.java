@@ -22,7 +22,7 @@ public class Main {
         algorithms.put("GA", new GeneticAlgorithm());
         algorithms.put("FA", new FireFlyAlgorithm());
         algorithms.put("TS", new TabuSearchAlgorithm());
-        algorithms.put("MFF", new ModifiedFirstFitDecreasingAlgorithm());
+        algorithms.put("MFFD", new ModifiedFirstFitDecreasingAlgorithm());
         // TODO: Add other algorithms here
 
         System.out.println("Bin Packing Problem Solver");
