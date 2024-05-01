@@ -1,3 +1,9 @@
+// Authors: Naufal Hardiansyah, Patricia Valerie Santoso, Devan Lucian, Bryan Chandra
+// School of Computer Science
+// University of Nottingham Malaysia
+// Group 11
+// GitHub: https://github.com/Cranbaerry/Bin-Packing-Problem
+
 import algorithms.*;
 import objects.Problem;
 import objects.Result;
@@ -15,15 +21,15 @@ public class Main {
     private static final String RESULTS_FOLDER = "results/";
     private static final int TEST_RUNS = 30;
 
-    public static void main(String[] args) throws CloneNotSupportedException, IOException {
+    public static void main(String[] args) throws CloneNotSupportedException {
         List<Problem> problems = readBinPackingProblems(PROBLEM_FILEPATH);
         Map<String, Algorithm> algorithms = new HashMap<>();
-        Map<String, Map<String, List<Result>>> results = new HashMap<>(); // Stores averages for each problem-algorithm pair
+        Map<String, Map<String, List<Result>>> results = new HashMap<>();
+        // Note: Uncomment every algorithm to run all algorithms
         algorithms.put("GA", new GeneticAlgorithm());
         algorithms.put("FA", new FireFlyAlgorithm());
         algorithms.put("TS", new TabuSearchAlgorithm());
         algorithms.put("MFFD", new ModifiedFirstFitDecreasingAlgorithm());
-        // TODO: Add other algorithms here
 
         System.out.println("Bin Packing Problem Solver");
         System.out.printf("Found %d problems in %s%n", problems.size(), PROBLEM_FILEPATH);
@@ -63,9 +69,14 @@ public class Main {
             //break;
         }
 
-        printAveragesToCSV(results, true); // for avg. number of bins and run time bar chart
-        printDetailedIterationDataToCSV(results); // for convergence graph
-        printRuntimeDataToCSV(results); // for runtime box plot
+        try {
+            printAveragesToCSV(results, true); // for avg. number of bins and run time bar chart
+            printDetailedIterationDataToCSV(results); // for convergence graph
+            printRuntimeDataToCSV(results); // for runtime box plot
+        } catch (IOException e) {
+            System.out.println("Failed to write results to CSV files");
+            e.printStackTrace();
+        }
 
         double totalRunTime = results.values().stream()
                 .flatMap(m -> m.values().stream())
@@ -114,6 +125,7 @@ public class Main {
                 problems.add(problem);
             }
         } catch (IOException e) {
+            System.out.println("Failed to read problems from file: " + filename);
             e.printStackTrace();
         }
         return problems;
@@ -226,34 +238,30 @@ public class Main {
         csvWriter.close();
     }
 
-    private static void printRuntimeDataToCSV(Map<String, Map<String, List<Result>>> results) {
-        try {
-            FileWriter csvWriter = new FileWriter(RESULTS_FOLDER + "runtimes.csv");
-            String header = String.format("Problem,Algorithm,Runtime (ms)%n");
-            csvWriter.write(header);
+    private static void printRuntimeDataToCSV(Map<String, Map<String, List<Result>>> results) throws IOException {
+        FileWriter csvWriter = new FileWriter(RESULTS_FOLDER + "runtimes.csv");
+        String header = String.format("Problem,Algorithm,Runtime (ms)%n");
+        csvWriter.write(header);
 
-            String previousProblemName = "";
-            for (Map.Entry<String, Map<String, List<Result>>> problemResults : results.entrySet()) {
-                String problemName = problemResults.getKey();
-                for (Map.Entry<String, List<Result>> algorithmResults : problemResults.getValue().entrySet()) {
-                    String algorithmName = algorithmResults.getKey();
-                    List<Result> resultsList = algorithmResults.getValue();
-                    for (Result result : resultsList) {
-                        if (previousProblemName.equals(problemName)) {
-                            problemName = "";
-                        } else {
-                            previousProblemName = problemName;
-                        }
-                        String output = String.format("%s,%s,%d%n", problemName, algorithmName, result.getRuntime());
-                        csvWriter.write(output);
+        String previousProblemName = "";
+        for (Map.Entry<String, Map<String, List<Result>>> problemResults : results.entrySet()) {
+            String problemName = problemResults.getKey();
+            for (Map.Entry<String, List<Result>> algorithmResults : problemResults.getValue().entrySet()) {
+                String algorithmName = algorithmResults.getKey();
+                List<Result> resultsList = algorithmResults.getValue();
+                for (Result result : resultsList) {
+                    if (previousProblemName.equals(problemName)) {
+                        problemName = "";
+                    } else {
+                        previousProblemName = problemName;
                     }
+                    String output = String.format("%s,%s,%d%n", problemName, algorithmName, result.getRuntime());
+                    csvWriter.write(output);
                 }
             }
-
-            csvWriter.flush();
-            csvWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+
+        csvWriter.flush();
+        csvWriter.close();
     }
 }
