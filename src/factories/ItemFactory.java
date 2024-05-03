@@ -15,6 +15,20 @@ public class ItemFactory implements Cloneable {
         return items;
     }
 
+    public ArrayList<Integer> getItemsFlattened() {
+        ArrayList<Integer> itemsList = new ArrayList<>();
+        for (int weight : items.keySet()) {
+            for (int i = 0; i < items.get(weight); i++) {
+                itemsList.add(weight);
+            }
+        }
+        return itemsList;
+    }
+
+    public int getNumberOfItems() {
+        return this.getItemsFlattened().size();
+    }
+
     public void clearItems() {
         items.clear();
     }
@@ -45,10 +59,6 @@ public class ItemFactory implements Cloneable {
 
     public boolean containsItem(int weight) {
         return items.containsKey(weight);
-    }
-
-    public int getNumberOfItems() {
-        return items.size();
     }
 
     public int getTotalWeight() {

@@ -11,6 +11,7 @@ public class Result {
     private double binFullness;
     private double fairnessOfPacking;
     private double solutionFitness;
+    private Solution solution;
 
     private HashMap<Integer, Integer> iterationData;
 
@@ -102,6 +103,14 @@ public class Result {
 
     public void setIterationData(HashMap<Integer, Integer> iterationData) {
         this.iterationData = iterationData;
+    }
+
+    public Solution getSolution() {
+        return solution;
+    }
+
+    public void setSolution(Solution solution) {
+        this.solution = solution;
     }
 
     public void printIterationData() {

@@ -8,7 +8,6 @@ import java.util.*;
 
 public class FireFlyAlgorithm implements Algorithm {
     private int populationSize;
-    private double attractivenessBase;
     private double alpha;
     private double beta;
     private double gamma;
@@ -18,43 +17,45 @@ public class FireFlyAlgorithm implements Algorithm {
     public FireFlyAlgorithm() {
         // Initializing custom parameters
         this.populationSize = 100;
-        this.attractivenessBase = 0.1;
         this.alpha = 0.5;
         this.beta = 1.0;
-        this.gamma = 0.1;
+        this.gamma = 0.5;
     }
 
     public Solution solve(Problem problem) {
         Solution solution = new Solution(problem);
         this.binCapacity = problem.getCapacity();
         this.items = problem.items.flatten();
-        int fireFlyPosition = items.size();
+
+        // Initialize population of fireflies
         List<Firefly> population = new ArrayList<>();
         for (int i = 0; i < populationSize; i++) {
-            population.add(new Firefly(createFireFlies(items, fireFlyPosition), binCapacity));
+            population.add(new Firefly(createFireFlies(items), binCapacity));
         }
 
         int iteration = 0;
         int counter = 0;
         HashMap<Integer, Integer> iterationData = new HashMap<>();
         Firefly fittestFirefly = Collections.min(population, Comparator.comparing(Firefly::getFitness));
+        int Fitness_fittestFirefly = fittestFirefly.getFitness();
+        List<Integer> Best_fireflyposition = new ArrayList<>(fittestFirefly.getPosition());
         while (counter < 30) {
-            Collections.sort(population, (c1, c2) -> Integer.compare(c1.getFitness(), c2.getFitness()));
             population = moveFireflies(population);
             iteration++;
-
             Firefly temp = Collections.min(population, Comparator.comparing(Firefly::getFitness));
-
-            if (temp == fittestFirefly) {
+            if (Fitness_fittestFirefly <= temp.getFitness()){
                 counter++;
             } else {
                 fittestFirefly = temp;
+                Best_fireflyposition = new ArrayList<>(fittestFirefly.getPosition());
+                Fitness_fittestFirefly = fittestFirefly.getFitness();
                 counter = 0;
             }
-            iterationData.put(iteration, fittestFirefly.getFitness());
+            iterationData.put(iteration, Fitness_fittestFirefly);
         }
-
-        fittestFirefly = Collections.min(population, Comparator.comparing(Firefly::getFitness));
+        for (int i = 0; i < fittestFirefly.getPosition().size(); i++) {
+            fittestFirefly.getPosition().set(i, Best_fireflyposition.get(i));}
+        Collections.shuffle(fittestFirefly.getPosition());
         int currentBinCapacity = 0;
         ItemFactory items = new ItemFactory();
         for (int firefly : fittestFirefly.getPosition()) {
@@ -67,11 +68,11 @@ public class FireFlyAlgorithm implements Algorithm {
             currentBinCapacity += firefly;
         }
 
-
+        solution.bins.createBin(items);
         return solution.finalizeResult(iterationData);
     }
 
-    private List<Integer> createFireFlies(List<Integer> items, int Particle_Position) {
+    private List<Integer> createFireFlies(List<Integer> items) {
         List<Integer> individual = new ArrayList<>(items);
         Collections.shuffle(individual);
         return individual;
@@ -85,30 +86,61 @@ public class FireFlyAlgorithm implements Algorithm {
         return Math.sqrt(distance);
     }
 
-    private List<Firefly> moveFireflies(List<Firefly> fireflies) {
-        Random random = new Random();
-        List<Firefly> nextPosition = new ArrayList<>();
-
+    private double[] minMaxNormalizeDistance(List<Firefly> fireflies) {
+        double min_Distance = Double.MAX_VALUE;
+        double max_Distance = Double.MIN_VALUE;
         for (Firefly current : fireflies) {
             for (Firefly other : fireflies) {
                 if (current.getFitness() < other.getFitness()) {
-                    double distance = calculateEuclideanDistance(current.getPosition(), other.getPosition());
-                    double betaAttractiveness = beta * Math.exp(-gamma * Math.pow(distance, 2));
-                    double moveProb = alpha * (random.nextDouble() - 0.5);
-
-                    for (int i = 0; i < current.getPosition().size(); i++) {
-                        if (random.nextDouble() < betaAttractiveness) {
-                            int newPosition = current.getPosition().get(i) + (int) moveProb;
-                            current.getPosition().set(i, newPosition);
-                        }
-                    }
-
-                    current.calculateFitness(binCapacity);
-
+                    double distance = calculateEuclideanDistance(other.getPosition(), current.getPosition());
+                    min_Distance = Math.min(min_Distance, distance);
+                    max_Distance = Math.max(max_Distance, distance);
                 }
             }
         }
-        return fireflies;
+        return new double[]{min_Distance, max_Distance};
+    }
+
+    private List<Firefly> moveFireflies(List<Firefly> fireflies) {
+        List<Firefly> newFireflies = new ArrayList<>();
+        Random random = new Random();
+        double[] distances = minMaxNormalizeDistance(fireflies);
+        double minDistance = distances[0];
+        double maxDistance = distances[1];
+
+        // Compare Current Firefly with other Fireflies
+        for (Firefly current : fireflies) {
+            boolean attracted = false;
+            for (Firefly other : fireflies) {
+                double distance = calculateEuclideanDistance(other.getPosition(), current.getPosition());
+                double normalizedDistance = 5 * (distance - minDistance) / (maxDistance - minDistance); // Normalize distance between 0 and 5, or else value for betaAttractiveness will be 0
+                double betaAttractiveness = beta * Math.exp(-gamma * Math.pow(normalizedDistance, 2));
+                double moveProb = alpha * (random.nextDouble() - 0.5);
+
+                double currentLightIntensity = (current.getFitness() * Math.exp(-gamma * Math.pow(normalizedDistance, 2)));
+                double otherLightIntensity = (other.getFitness() * Math.exp(-gamma * Math.pow(normalizedDistance, 2)));
+                // If fitness of current firefly is bigger than other firefly, current firefly becomes attracted to other firefly
+                if (currentLightIntensity > otherLightIntensity) {
+                    if (Math.abs(betaAttractiveness + moveProb) > random.nextDouble()) {
+                        List<Integer> new_positionsO = new ArrayList<>(other.getPosition());
+                        for (int i = 0; i < current.getPosition().size(); i++) {
+                            current.getPosition().set(i, new_positionsO.get(i));
+                        }
+                    }
+                    attracted = true;
+                }
+            }
+            if (!attracted) {// If not attracted to anyone, shuffle the positions
+                List<Integer> new_positionsC = new ArrayList<>(current.getPosition());
+                Collections.shuffle(new_positionsC);
+                for (int i = 0; i < current.getPosition().size(); i++) {
+                    current.getPosition().set(i, new_positionsC.get(i));
+                }
+            }
+            current.calculateFitness(binCapacity);
+            newFireflies.add(current);
+        }
+        return newFireflies;
     }
 }
 
@@ -138,6 +170,9 @@ class Firefly {
                 currentBinCapacity = 0;
             }
             currentBinCapacity += item;
+        }
+        if (currentBinCapacity > 0) {
+            fitness++;
         }
     }
 }

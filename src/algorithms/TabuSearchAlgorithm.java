@@ -28,7 +28,7 @@ public class TabuSearchAlgorithm implements Algorithm {
     private int maximumNeighbors;
 
     public TabuSearchAlgorithm() {
-        this.convergenceIterations = 50;
+        this.convergenceIterations = 30;
         this.maximumNeighbors = 50;
         this.binSizeThreshold = 10;
     }

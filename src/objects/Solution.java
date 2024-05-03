@@ -40,6 +40,7 @@ public class Solution implements Cloneable {
         result.setFairnessOfPacking(this.bins.getBinFullnessStdDev());
         result.setFitness(this.getFitness());
         result.setIterationData(this.iterationData);
+        result.setSolution(this);
 
         return result;
     }

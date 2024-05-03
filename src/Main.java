@@ -5,6 +5,7 @@
 // GitHub: https://github.com/Cranbaerry/Bin-Packing-Problem
 
 import algorithms.*;
+import factories.ItemFactory;
 import objects.Problem;
 import objects.Result;
 import objects.Solution;
@@ -15,6 +16,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Main {
     private static final String PROBLEM_FILEPATH = "BPP.txt";
@@ -65,8 +67,6 @@ public class Main {
                     results.get(problem.getName()).get(algorithmName).add(result);
                 }
             }
-            // TODO: remove this break statement to run all problems
-            //break;
         }
 
         try {
